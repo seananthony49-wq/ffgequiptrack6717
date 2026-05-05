@@ -7,251 +7,272 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --espn-red: #CC0000;
+            --espn-black: #000000;
+            --espn-blue: #3c78e6;
+            --espn-grey: #f2f2f2;
+        }
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .active-nav { background-color: #f0f4ff; color: #4338ca; }
-        .active-nav-mobile { color: #4f46e5; border-top: 2px solid #4f46e5; }
-        .modal-backdrop { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
-        #loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s; text-align: center; }
-        .hidden-overlay { opacity: 0; pointer-events: none; visibility: hidden; }
-        .sortable { cursor: pointer; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         
+        .bg-espn-red { background-color: var(--espn-red); }
+        .bg-espn-black { background-color: var(--espn-black); }
+        .bg-espn-blue { background-color: var(--espn-blue); }
+        .text-espn-red { color: var(--espn-red); }
+        
+        .active-nav { background-color: white; color: var(--espn-red) !important; font-weight: 800; border-radius: 0 50px 50px 0; margin-right: -1rem; }
+        .active-nav .lucide { color: var(--espn-red); }
+        .active-nav-mobile { color: var(--espn-red); border-bottom: 4px solid var(--espn-red); padding-bottom: 8px; }
+        
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
+        #loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .hidden-overlay { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s; }
+        
+        .sortable { cursor: pointer; transition: background 0.2s; }
+        .sortable:hover { background-color: #f8fafc; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
-        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+        .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
+<body class="bg-[#f2f2f2] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
 
     <div id="loading-overlay">
-        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p id="loading-text" class="text-slate-600 font-medium px-6">Synchronising Cloud Data...</p>
-        <button id="bypass-btn" class="mt-6 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-lg hidden">Launch Local Mode</button>
+        <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
+        <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest">Loading Database...</p>
+        <button id="bypass-btn" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full hidden">Local Bypass</button>
     </div>
 
     <input type="file" id="system-restore-input" class="hidden" accept=".xlsx" onchange="processSystemRestore(this)">
 
-    <!-- Desktop Sidebar -->
-    <aside class="hidden md:flex w-64 bg-white border-r border-slate-200 p-4 flex flex-col h-screen sticky top-0">
-        <div class="flex items-center gap-2 px-2 mb-8 cursor-pointer" onclick="setView('dashboard')">
-            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><i data-lucide="package" class="text-white w-5 h-5"></i></div>
-            <h1 class="font-bold text-xl text-slate-800 tracking-tight">EquipTrack</h1>
+    <!-- Sidebar (Desktop) -->
+    <aside class="hidden md:flex w-64 bg-[#CC0000] flex-col h-screen sticky top-0 shadow-2xl overflow-hidden">
+        <div class="p-8 cursor-pointer group" onclick="setView('dashboard')">
+            <div class="flex items-center gap-2">
+                <i data-lucide="package" class="text-white w-8 h-8 group-hover:rotate-12 transition-transform"></i>
+                <h1 class="font-black text-3xl text-white italic tracking-tighter leading-none">EquipTrack</h1>
+            </div>
+            <div class="h-1 w-12 bg-white/30 mt-2 rounded-full"></div>
         </div>
-        <nav class="space-y-1 flex-1 overflow-y-auto">
-            <button onclick="setView('dashboard')" data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50">
+        
+        <nav class="space-y-1 flex-1 pl-4">
+            <button onclick="setView('dashboard')" data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-6 py-4 text-white/80 transition-all hover:text-white font-bold text-sm uppercase tracking-wide">
                 <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
             </button>
-            <button onclick="setView('inventory')" data-view="inventory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50">
+            <button onclick="setView('inventory')" data-view="inventory" class="nav-btn w-full flex items-center gap-3 px-6 py-4 text-white/80 transition-all hover:text-white font-bold text-sm uppercase tracking-wide">
                 <i data-lucide="layers" class="w-4 h-4"></i> Inventory
             </button>
-            <button onclick="setView('checkouts')" data-view="checkouts" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50">
+            <button onclick="setView('checkouts')" data-view="checkouts" class="nav-btn w-full flex items-center gap-3 px-6 py-4 text-white/80 transition-all hover:text-white font-bold text-sm uppercase tracking-wide">
                 <i data-lucide="clock" class="w-4 h-4"></i> Active Loans
             </button>
-            <button onclick="setView('employees')" data-view="employees" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:bg-slate-50">
+            <button onclick="setView('employees')" data-view="employees" class="nav-btn w-full flex items-center gap-3 px-6 py-4 text-white/80 transition-all hover:text-white font-bold text-sm uppercase tracking-wide">
                 <i data-lucide="users" class="w-4 h-4"></i> Employees
             </button>
-            <div class="pt-6 pb-2 px-3"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System</p></div>
-            <button onclick="exportSystemData()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:bg-indigo-50 transition-colors"><i data-lucide="download" class="w-4 h-4"></i> Export All</button>
-            <button onclick="triggerSystemRestore()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:bg-indigo-50 transition-colors"><i data-lucide="upload" class="w-4 h-4"></i> Import All</button>
         </nav>
-        <div class="mt-auto p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <div class="flex items-center gap-2 text-xs text-slate-700">
-                <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
-                <span id="status-text">Ready</span>
+
+        <div class="p-6 mt-auto">
+            <div class="bg-black/20 rounded-2xl p-4 border border-white/10">
+                <p class="text-[9px] font-black text-white/40 uppercase tracking-widest mb-3 italic">System Controls</p>
+                <div class="flex flex-col gap-2">
+                    <button onclick="exportSystemData()" class="flex items-center gap-2 text-[10px] font-black text-white hover:text-white/70 uppercase">
+                        <i data-lucide="download" class="w-3 h-3"></i> Export All
+                    </button>
+                    <button onclick="triggerSystemRestore()" class="flex items-center gap-2 text-[10px] font-black text-white hover:text-white/70 uppercase">
+                        <i data-lucide="upload" class="w-3 h-3"></i> Restore Backup
+                    </button>
+                </div>
+            </div>
+            <div class="mt-6 flex items-center gap-2">
+                <div id="status-dot" class="w-2 h-2 rounded-full bg-white/20"></div>
+                <span id="status-text" class="text-[9px] font-black text-white/40 uppercase tracking-widest">Connecting...</span>
             </div>
         </div>
     </aside>
 
-    <!-- Mobile Header -->
-    <header class="md:hidden bg-white border-b px-4 py-3 sticky top-0 z-40 flex items-center justify-between">
+    <!-- Header (Mobile) -->
+    <header class="md:hidden bg-[#CC0000] px-5 py-5 sticky top-0 z-40 flex items-center justify-between shadow-xl">
         <div class="flex items-center gap-2 cursor-pointer" onclick="setView('dashboard')">
-            <div class="w-7 h-7 bg-indigo-600 rounded flex items-center justify-center"><i data-lucide="package" class="text-white w-4 h-4"></i></div>
-            <h1 class="font-bold text-lg text-slate-800">EquipTrack</h1>
+            <h1 class="font-black text-2xl text-white italic tracking-tighter">EquipTrack</h1>
         </div>
-        <div id="mobile-status-dot" class="w-2 h-2 rounded-full bg-slate-300"></div>
+        <div id="mobile-status-dot" class="w-2.5 h-2.5 rounded-full bg-white/30 border-2 border-white/10"></div>
     </header>
 
-    <main class="flex-1 p-4 md:p-8 overflow-y-auto">
-        <header class="flex flex-col gap-4 mb-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center gap-3 flex-1">
-                    <div class="relative flex-1">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                        <input type="text" id="search-input" placeholder="Search items, LN, SN, or staff..." class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm w-full md:w-64 outline-none shadow-sm" oninput="handleSearch(this.value)" />
+    <main class="flex-1 p-4 md:p-10 overflow-y-auto">
+        <header class="mb-10">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="flex items-center gap-4 flex-1">
+                    <div class="relative flex-1 max-w-xl">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                        <input type="text" id="search-input" placeholder="Search items, serial numbers, staff..." class="w-full pl-12 pr-6 py-4 bg-white border-none rounded-2xl text-sm font-medium shadow-sm focus:ring-4 focus:ring-black/5 outline-none" oninput="handleSearch(this.value)" />
                     </div>
                     
                     <div class="hidden md:block relative">
-                        <button id="add-new-btn" onclick="toggleAddDropdown(event)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-100">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Add New <i data-lucide="chevron-down" class="w-3 h-3 opacity-60"></i>
+                        <button id="add-new-btn" onclick="toggleAddDropdown(event)" class="bg-[#3c78e6] hover:bg-[#2a5bbd] text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all shadow-xl shadow-blue-500/20">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add New
                         </button>
-                        <div id="add-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-[100] p-1.5">
-                            <button onclick="openItemModal();" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 rounded-xl transition-colors">
-                                <i data-lucide="box" class="w-4 h-4"></i> Inventory Unit
+                        <div id="add-dropdown" class="hidden absolute right-0 mt-3 w-56 bg-black rounded-[1.5rem] shadow-2xl z-[100] p-2 border border-white/10">
+                            <button onclick="openItemModal();" class="flex items-center gap-3 w-full px-4 py-3 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-xl transition-colors">
+                                <i data-lucide="box" class="w-4 h-4 text-[#CC0000]"></i> Inventory Item
                             </button>
-                            <button onclick="openEmployeeModal();" class="flex items-center gap-3 w-full px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 rounded-xl transition-colors mt-1">
-                                <i data-lucide="users" class="w-4 h-4"></i> Staff Member
+                            <button onclick="openEmployeeModal();" class="flex items-center gap-3 w-full px-4 py-3 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-xl transition-colors mt-1">
+                                <i data-lucide="users" class="w-4 h-4 text-[#CC0000]"></i> Employee Record
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="filter-toolbar" class="flex flex-wrap items-center gap-2">
-                    <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-white border border-slate-200 rounded-xl text-[11px] font-bold px-3 py-2 outline-none shadow-sm">
-                        <option value="All">All Categories</option>
-                        <option value="Laptop">Laptop</option>
-                        <option value="Docking Station">Docking Station</option>
-                        <option value="Headset">Headset</option>
-                        <option value="Monitor">Monitor</option>
-                        <option value="Other">Other</option>
-                    </select>
+                <div id="filter-toolbar" class="flex items-center">
+                    <!-- Improved Category Filter Visibility -->
+                    <div class="bg-white text-black border border-slate-200 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
+                        <i data-lucide="filter" class="w-4 h-4 text-[#CC0000]"></i>
+                        <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-slate-700">
+                            <option value="All">All Categories</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Docking Station">Docking Station</option>
+                            <option value="Headset">Headset</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <div id="content-area"></div>
+        <div id="content-area" class="space-y-8"></div>
     </main>
 
-    <!-- Mobile Bottom Nav -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center z-40 pb-safe shadow-lg">
-        <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-3 px-4 text-slate-400">
-            <i data-lucide="layout-dashboard" class="w-5 h-5 mb-1"></i>
-            <span class="text-[10px] font-bold uppercase tracking-widest">Home</span>
+    <!-- Mobile Nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-black flex justify-around items-center z-40 pb-safe shadow-2xl">
+        <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
+            <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Home</span>
         </button>
-        <button onclick="setView('inventory')" data-m-view="inventory" class="mobile-nav-btn flex flex-col items-center py-3 px-4 text-slate-400">
-            <i data-lucide="layers" class="w-5 h-5 mb-1"></i>
-            <span class="text-[10px] font-bold uppercase tracking-widest">Assets</span>
+        <button onclick="setView('inventory')" data-m-view="inventory" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
+            <i data-lucide="layers" class="w-6 h-6 mb-1"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Items</span>
         </button>
-        <button onclick="setView('checkouts')" data-m-view="checkouts" class="mobile-nav-btn flex flex-col items-center py-3 px-4 text-slate-400">
-            <i data-lucide="clock" class="w-5 h-5 mb-1"></i>
-            <span class="text-[10px] font-bold uppercase tracking-widest">Loans</span>
+        <button onclick="setView('checkouts')" data-m-view="checkouts" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
+            <i data-lucide="clock" class="w-6 h-6 mb-1"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Loans</span>
         </button>
-        <button onclick="setView('employees')" data-m-view="employees" class="mobile-nav-btn flex flex-col items-center py-3 px-4 text-slate-400">
-            <i data-lucide="users" class="w-5 h-5 mb-1"></i>
-            <span class="text-[10px] font-bold uppercase tracking-widest">Staff</span>
+        <button onclick="setView('employees')" data-m-view="employees" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
+            <i data-lucide="users" class="w-6 h-6 mb-1"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest">Staff</span>
         </button>
     </nav>
 
-    <!-- Mobile Floating Add Button -->
-    <button onclick="toggleMobileAddMenu()" class="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center z-50 transition-transform active:scale-90">
-        <i data-lucide="plus" class="w-7 h-7"></i>
+    <!-- Floating Add Button -->
+    <button onclick="toggleMobileAddMenu()" class="md:hidden fixed bottom-28 right-6 w-16 h-16 bg-[#3c78e6] text-white rounded-full shadow-2xl flex items-center justify-center z-50">
+        <i data-lucide="plus" class="w-8 h-8"></i>
     </button>
 
     <div id="mobile-add-menu" class="fixed inset-0 z-[60] hidden">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleMobileAddMenu()"></div>
-        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 pb-12 animate-slide-up">
-            <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6"></div>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="openItemModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-3 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center"><i data-lucide="box"></i></div>
-                    <span class="text-sm font-bold text-slate-700">Add Unit</span>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="toggleMobileAddMenu()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-10 pb-16 animate-slide-up border-t-8 border-t-[#CC0000]">
+            <div class="w-16 h-1.5 bg-slate-100 rounded-full mx-auto mb-10"></div>
+            <div class="grid grid-cols-2 gap-6">
+                <button onclick="openItemModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform">
+                    <div class="w-16 h-16 bg-[#CC0000] text-white rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-red-500/20"><i data-lucide="box" class="w-8 h-8"></i></div>
+                    <span class="text-xs font-black text-black uppercase tracking-widest">Add Item</span>
                 </button>
-                <button onclick="openEmployeeModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-3 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center"><i data-lucide="user-plus"></i></div>
-                    <span class="text-sm font-bold text-slate-700">Add Staff</span>
+                <button onclick="openEmployeeModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform">
+                    <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl"><i data-lucide="user-plus" class="w-8 h-8"></i></div>
+                    <span class="text-xs font-black text-black uppercase tracking-widest">Add Staff</span>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- Modals -->
-    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0">
-            <div class="p-6 border-b font-bold text-lg text-slate-800">Add Equipment</div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-3 gap-4">
+    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-[#CC0000]">
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
+                <h3 class="text-3xl font-black text-black italic tracking-tighter">ITEM DATA</h3>
+                <button onclick="closeModal('item-modal')" class="p-3 bg-slate-50 rounded-full hover:rotate-90 transition-transform"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            <div class="p-10 space-y-6">
+                <div class="grid grid-cols-3 gap-6">
                     <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Model Name *</label>
-                        <input type="text" id="item-name" list="model-suggestions" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Model Name</label>
+                        <input type="text" id="item-name" list="model-suggestions" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold focus:ring-4 focus:ring-red-500/10 outline-none" />
                         <datalist id="model-suggestions"></datalist>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Quantity</label>
-                        <input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Quantity</label>
+                        <input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" />
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Category</label><select id="item-category" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"><option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option></select></div>
-                    <div><label id="ln-label" class="block text-xs font-bold text-slate-400 uppercase mb-1">Laptop ID (LN)</label><input type="text" id="item-ln" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm" /></div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Category</label>
+                        <select id="item-category" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none">
+                            <option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div><label id="ln-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Laptop ID</label><input type="text" id="item-ln" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
                 </div>
-                <div><label id="sn-label" class="block text-xs font-bold text-slate-400 uppercase mb-1">Serial Number</label><input type="text" id="item-serial" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm" /></div>
-                <p id="bulk-warning" class="hidden text-[10px] text-orange-500 font-bold bg-orange-50 p-2 rounded-lg leading-tight uppercase">Bulk mode active: Unique IDs (LN/Serial) disabled. Add them later via Expansion.</p>
+                <div><label id="sn-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Serial Number</label><input type="text" id="item-serial" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
+                <p id="bulk-warning" class="hidden text-[10px] text-[#CC0000] font-black bg-red-50 p-4 rounded-2xl leading-relaxed uppercase tracking-widest border border-red-100 italic">Bulk mode: Identifiers disabled. Add details later in unit list.</p>
             </div>
-            <div class="p-6 flex gap-3"><button onclick="closeModal('item-modal')" class="flex-1 py-3 font-bold border border-slate-100 rounded-xl text-slate-500">Cancel</button><button onclick="saveItem()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100">Save</button></div>
+            <div class="p-10 bg-slate-50 flex gap-6">
+                <button onclick="closeModal('item-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button>
+                <button onclick="saveItem()" class="flex-1 py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl">Confirm Save</button>
+            </div>
         </div>
     </div>
 
-    <div id="employee-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0">
-            <div class="p-6 border-b"><h3 id="employee-modal-title" class="text-xl font-bold text-slate-800">Add Staff</h3></div>
-            <div class="p-6 space-y-4">
-                <input type="text" id="emp-name" placeholder="Full Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
-                <input type="text" id="emp-dept" placeholder="Department" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div class="p-6 flex gap-3"><button onclick="closeModal('employee-modal')" class="flex-1 py-3 font-bold border border-slate-100 rounded-xl text-slate-500">Cancel</button><button onclick="saveEmployee()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100">Save</button></div>
-        </div>
-    </div>
-
-    <!-- Bulk Checkout Modal UPGRADED -->
+    <!-- Bulk Assignment Modal -->
     <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+        <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
+            <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-800 tracking-tight">Bulk Assignment</h3>
-                    <p id="bulk-checkout-subtitle" class="text-xs text-indigo-600 font-bold mt-1 uppercase"></p>
+                    <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase">Bulk Assignment</h3>
+                    <p id="bulk-checkout-subtitle" class="text-xs text-[#3c78e6] font-black mt-2 uppercase tracking-widest"></p>
                 </div>
-                <button onclick="toggleBulkSelectAll()" id="bulk-select-all-btn" class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-200 transition-colors">Select All Staff</button>
+                <button onclick="toggleBulkSelectAll()" id="bulk-select-all-btn" class="px-8 py-4 bg-slate-100 text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm">Select All</button>
             </div>
-            <div class="p-4 border-b bg-white flex gap-3">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                    <input type="text" id="bulk-staff-search" placeholder="Find staff..." oninput="renderBulkStaffList(this.value)" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+            <div class="p-6 border-b bg-slate-50">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300"></i>
+                    <input type="text" id="bulk-staff-search" placeholder="Search staff records..." oninput="renderBulkStaffList(this.value)" class="w-full pl-14 pr-6 py-5 bg-white border-none rounded-3xl text-sm font-bold outline-none shadow-sm" />
                 </div>
             </div>
-            <div class="overflow-y-auto flex-1 p-4" id="bulk-staff-list">
-                <!-- Staff entries with quantity selectors will be injected here -->
-            </div>
-            <div id="bulk-stock-warning" class="hidden px-6 py-2 bg-red-50 text-red-600 text-[10px] font-bold text-center uppercase tracking-widest border-t border-red-100">
-                ERROR: REQUESTED QUANTITY EXCEEDS AVAILABLE STOCK
-            </div>
-            <div class="p-6 bg-slate-50 border-t flex items-center justify-between">
+            <div class="overflow-y-auto flex-1 p-8 grid grid-cols-1 md:grid-cols-2 gap-4" id="bulk-staff-list"></div>
+            <div id="bulk-stock-warning" class="hidden px-10 py-4 bg-red-600 text-white text-[10px] font-black text-center uppercase tracking-[0.2em] italic">Stock Alert: Allocation exceeds available units</div>
+            <div class="p-10 bg-white border-t flex items-center justify-between">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Total Requested</p>
-                    <p class="text-lg font-black text-slate-800"><span id="bulk-total-requested">0</span> <span class="text-slate-300 font-medium">/</span> <span id="bulk-max-stock">0</span></p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Items Requested</p>
+                    <p class="text-3xl font-black text-black tracking-tighter"><span id="bulk-total-requested">0</span> <span class="text-slate-200">/</span> <span id="bulk-max-stock" class="text-[#3c78e6]">0</span></p>
                 </div>
-                <div class="flex gap-3">
-                    <button onclick="closeModal('bulk-checkout-modal')" class="px-6 py-2.5 font-bold border border-slate-200 rounded-xl text-slate-500 bg-white shadow-sm">Cancel</button>
-                    <button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-8 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none">Execute</button>
+                <div class="flex gap-4">
+                    <button onclick="closeModal('bulk-checkout-modal')" class="px-8 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button>
+                    <button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-12 py-5 bg-[#3c78e6] text-white rounded-3xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-blue-500/30 transition-all disabled:opacity-20">Confirm Assignment</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modals (Unified Styling) -->
-    <div id="checkout-modal" class="fixed inset-0 modal-backdrop z-[110] hidden flex items-end md:items-center justify-center p-0 md:p-4">
-        <div class="bg-white rounded-t-3xl md:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0">
-            <div class="p-6 border-b border-slate-100"><h3 class="font-bold text-slate-800">Checkout</h3><p id="modal-item-info" class="text-xs text-indigo-600 font-bold mt-1 uppercase"></p></div>
-            <div class="p-6 space-y-5">
-                <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Employee</label><select id="modal-employee-select" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select></div>
-                <div><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Return Date</label><input type="date" id="modal-due-date" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none" /></div>
-            </div>
-            <div class="p-6 flex gap-3"><button onclick="closeModal('checkout-modal')" class="hidden md:block flex-1 py-3 border border-slate-100 rounded-xl text-slate-500">Cancel</button><button onclick="confirmCheckout()" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold">Confirm</button></div>
-        </div>
-    </div>
-
+    <!-- History Modal -->
     <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div class="p-6 border-b flex justify-between items-center bg-slate-50/50">
-                <h3 id="history-modal-title" class="font-bold text-slate-800 tracking-tight">Usage History</h3>
-                <button onclick="closeModal('history-modal')" class="p-2 hover:bg-slate-200 rounded-full transition-colors"><i data-lucide="x" class="text-slate-400"></i></button>
+        <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[12px] border-t-black">
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
+                <h3 id="history-modal-title" class="text-3xl font-black italic text-black tracking-tighter">HISTORY LOGS</h3>
+                <button onclick="closeModal('history-modal')" class="p-3 bg-slate-50 rounded-full shadow-sm hover:rotate-90 transition-transform"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
             </div>
-            <div class="overflow-y-auto flex-1">
+            <div class="overflow-y-auto flex-1 p-0">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 sticky top-0">
-                        <tr><th class="px-6 py-4 tracking-widest">Equipment</th><th class="px-6 py-4 tracking-widest">Date</th><th class="px-6 py-4 text-right pr-6 tracking-widest">Status</th></tr>
+                    <thead class="bg-slate-100 text-[11px] uppercase font-black text-slate-500 sticky top-0 z-10 border-b">
+                        <tr><th id="history-th-1" class="px-10 py-6 tracking-widest uppercase">Member / Item</th><th class="px-10 py-6 tracking-widest uppercase">Timeline</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase">Status</th></tr>
                     </thead>
                     <tbody id="history-table-body" class="divide-y divide-slate-100"></tbody>
                 </table>
@@ -259,12 +280,49 @@
         </div>
     </div>
 
+    <!-- Staff Details Modal -->
+    <div id="employee-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-black">
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
+                <h3 id="employee-modal-title" class="text-3xl font-black text-black italic tracking-tighter">EMPLOYEE DATA</h3>
+                <button onclick="closeModal('employee-modal')" class="p-3 bg-slate-50 rounded-full"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            <div class="p-10 space-y-6">
+                <input type="text" id="emp-name" placeholder="FULL NAME" class="w-full p-6 bg-slate-100 border-none rounded-2xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5" />
+                <input type="text" id="emp-dept" placeholder="DEPARTMENT" class="w-full p-6 bg-slate-100 border-none rounded-2xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5" />
+            </div>
+            <div class="p-10 bg-slate-50 flex gap-6">
+                <button onclick="closeModal('employee-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button>
+                <button onclick="saveEmployee()" class="flex-1 py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Confirm Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
     <div id="delete-modal" class="fixed inset-0 modal-backdrop z-[200] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-sm overflow-hidden p-6 text-center">
-            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="trash-2" class="w-8 h-8"></i></div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2">Delete Permanently?</h3>
-            <p class="text-slate-500 text-sm mb-6 leading-relaxed">This action cannot be undone.</p>
-            <div class="flex gap-3"><button onclick="closeModal('delete-modal')" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-slate-600">Cancel</button><button onclick="confirmDelete()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-100">Delete</button></div>
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden p-10 text-center">
+            <div class="w-20 h-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i data-lucide="trash-2" class="w-10 h-10"></i></div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2 tracking-tight">Delete Permanent?</h3>
+            <p class="text-slate-400 text-sm mb-8 leading-relaxed">This record will be purged from the database forever.</p>
+            <div class="flex gap-4"><button onclick="closeModal('delete-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest bg-slate-50 rounded-2xl text-slate-400">Cancel</button><button onclick="confirmDelete()" class="flex-1 py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-red-200">Delete</button></div>
+        </div>
+    </div>
+
+    <!-- Individual Assignment Modal -->
+    <div id="checkout-modal" class="fixed inset-0 modal-backdrop z-[110] hidden flex items-end md:items-center justify-center p-0 md:p-4">
+        <div class="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0 border-t-[12px] border-t-[#3c78e6]">
+            <div class="p-10 border-b border-slate-50 bg-white">
+                <h3 class="text-3xl font-black italic text-black uppercase">Assign Item</h3>
+                <p id="modal-item-info" class="text-xs text-[#3c78e6] font-black mt-3 uppercase tracking-widest leading-relaxed"></p>
+            </div>
+            <div class="p-10 space-y-8">
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1 italic">Select Borrower</label><select id="modal-employee-select" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10"></select></div>
+                <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1 italic">Due Date</label><input type="date" id="modal-due-date" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10" /></div>
+            </div>
+            <div class="p-10 flex gap-6 bg-slate-50">
+                <button onclick="closeModal('checkout-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button>
+                <button onclick="confirmCheckout()" class="flex-1 py-5 bg-[#3c78e6] text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20">Finalize</button>
+            </div>
         </div>
     </div>
 
@@ -282,27 +340,25 @@
           appId: "1:1086542719557:web:49d7318c74e59e5050d12c"
         };
 
-        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center gap-4"><div class="${bg} ${c} p-3 rounded-xl"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-slate-500 text-sm font-medium tracking-tight mb-0.5 leading-none">${l}</p><p class="text-2xl font-bold text-slate-900 leading-none">${v}</p></div></div>`;
+        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 shadow-sm"><div class="${bg} ${c} p-5 rounded-3xl shadow-sm"><i data-lucide="${i}" class="w-7 h-7"></i></div><div><p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 leading-none">${l}</p><p class="text-3xl font-black text-black leading-none tracking-tighter italic">${v}</p></div></div>`;
 
         window.currentView = 'dashboard';
         window.searchQuery = '';
         window.inventory = []; window.employees = []; window.checkouts = []; window.isLocalMode = false; 
         window.expandedEmployees = new Set();
         window.expandedInventoryModels = new Set();
-        window.bulkSelectionMap = new Map(); // empId -> qty
+        window.bulkSelectionMap = new Map();
         window.currentBulkModel = '';
         window.filters = { cat: 'All' };
         window.sort = { field: 'name', dir: 'asc' };
         let db, auth;
 
-        window.dismissLoading = () => document.getElementById('loading-overlay').classList.add('hidden-overlay');
+        window.dismissLoading = () => document.getElementById('loading-overlay')?.classList.add('hidden-overlay');
+        
         window.switchToLocalMode = () => {
             window.isLocalMode = true;
-            const d = document.getElementById('status-dot');
-            const md = document.getElementById('mobile-status-dot');
-            if(d) d.className = 'w-2 h-2 rounded-full bg-orange-400';
-            if(md) md.className = 'w-2 h-2 rounded-full bg-orange-400';
-            document.getElementById('status-text').innerText = "Local Mode";
+            const dot = document.getElementById('status-dot');
+            if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500';
             window.inventory = JSON.parse(localStorage.getItem('et_inventory') || '[]');
             window.employees = JSON.parse(localStorage.getItem('et_employees') || '[]');
             window.checkouts = JSON.parse(localStorage.getItem('et_checkouts') || '[]');
@@ -320,9 +376,10 @@
             const check = () => { 
                 const d = document.getElementById('status-dot');
                 const md = document.getElementById('mobile-status-dot');
-                if(d) d.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
-                if(md) md.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
-                document.getElementById('status-text').innerText = "Synced"; 
+                if(d) d.className = 'w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]';
+                if(md) md.className = 'w-2.5 h-2.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white] border-2 border-white/20';
+                const st = document.getElementById('status-text');
+                if (st) st.innerText = "Synced & Online";
                 window.dismissLoading(); window.render(); 
             };
             onSnapshot(collection(db, 'inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
@@ -336,8 +393,8 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.inventory.map(i => ({ID: i.id, Model: i.name, Category: i.category, LN: i.lnNumber, SN: i.serial, Status: i.status}))), "Inventory");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.employees.map(e => ({ID: e.id, Name: e.name, Dept: e.department}))), "Employees");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.checkouts.map(c => ({ID: c.id, ItemID: c.itemId, EmployeeID: c.employeeId, Date: c.checkoutDate, Status: c.status}))), "Checkouts");
-            XLSX.writeFile(wb, `EquipTrack_Backup.xlsx`);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.checkouts.map(c => ({ID: c.id, ItemID: c.itemId, EmployeeID: c.employeeId, empName: c.empName, Date: c.checkoutDate, Status: c.status}))), "Checkouts");
+            XLSX.writeFile(wb, `EquipTrack_Data_Backup.xlsx`);
         };
 
         window.triggerSystemRestore = () => document.getElementById('system-restore-input').click();
@@ -355,8 +412,8 @@
                 };
                 await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'status',excel:'Status'}]);
                 await importSheet("Employees", "employees", [{local:'name',excel:'Name'},{local:'department',excel:'Dept'}]);
-                await importSheet("Checkouts", "checkouts", [{local:'itemId',excel:'ItemID'},{local:'employeeId',excel:'EmployeeID'},{local:'checkoutDate',excel:'Date'},{local:'status',excel:'Status'}]);
-                alert("Upload Complete!"); window.render();
+                await importSheet("Checkouts", "checkouts", [{local:'itemId',excel:'ItemID'},{local:'employeeId',excel:'EmployeeID'},{local:'empName',excel:'empName'},{local:'checkoutDate',excel:'Date'},{local:'status',excel:'Status'}]);
+                alert("Data Override Complete!"); window.render();
             };
             reader.readAsArrayBuffer(input.files[0]);
         };
@@ -379,11 +436,12 @@
         window.handleBulkInputToggle = (qty) => {
             const isBulk = parseInt(qty) > 1;
             const ln = document.getElementById('item-ln'); const sn = document.getElementById('item-serial');
-            ln.disabled = isBulk; sn.disabled = isBulk;
-            ln.classList.toggle('opacity-30', isBulk); sn.classList.toggle('opacity-30', isBulk);
-            document.getElementById('ln-label').classList.toggle('opacity-30', isBulk); document.getElementById('sn-label').classList.toggle('opacity-30', isBulk);
-            document.getElementById('bulk-warning').classList.toggle('hidden', !isBulk);
-            if (isBulk) { ln.value = ""; sn.value = ""; }
+            if (ln) ln.disabled = isBulk; if (sn) sn.disabled = isBulk;
+            if (ln) ln.classList.toggle('opacity-30', isBulk); if (sn) sn.classList.toggle('opacity-30', isBulk);
+            document.getElementById('ln-label')?.classList.toggle('opacity-30', isBulk); 
+            document.getElementById('sn-label')?.classList.toggle('opacity-30', isBulk);
+            document.getElementById('bulk-warning')?.classList.toggle('hidden', !isBulk);
+            if (isBulk) { if(ln) ln.value = ""; if(sn) sn.value = ""; }
         };
 
         window.openItemModal = (id = null) => { 
@@ -405,16 +463,16 @@
             const qty = parseInt(document.getElementById('item-qty').value) || 1;
             const category = document.getElementById('item-category').value;
             const ln = document.getElementById('item-ln').value;
-            const serial = document.getElementById('item-serial').value;
+            const sn = document.getElementById('item-serial').value;
             if (!name) return;
             if (window.editingItemId) {
-                const data = { name, category, lnNumber: ln, serial, status: window.inventory.find(i=>i.id===window.editingItemId).status };
+                const data = { name, category, lnNumber: ln, serial: sn, status: window.inventory.find(i=>i.id===window.editingItemId).status };
                 if (window.isLocalMode) { const idx = window.inventory.findIndex(i=>i.id===window.editingItemId); window.inventory[idx] = {id: window.editingItemId, ...data}; persistLocal(); }
                 else await setDoc(doc(db, 'inventory', window.editingItemId), data);
             } else {
                 for (let i = 0; i < qty; i++) {
                     const id = Date.now().toString() + i;
-                    const data = { name, category, lnNumber: qty > 1 ? "" : ln, serial: qty > 1 ? "" : serial, status: 'available' };
+                    const data = { name, category, lnNumber: qty > 1 ? "" : ln, serial: qty > 1 ? "" : sn, status: 'available' };
                     if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(db, 'inventory', id), data); }
                 }
                 if (window.isLocalMode) persistLocal();
@@ -425,7 +483,7 @@
         window.openEmployeeModal = (id = null) => {
             window.editingEmployeeId = id;
             const emp = id ? window.employees.find(e => e.id === id) : null;
-            document.getElementById('employee-modal-title').innerText = id ? 'Edit Staff Member' : 'Add Staff Member';
+            document.getElementById('employee-modal-title').innerText = id ? 'Edit Profile' : 'Add Profile';
             document.getElementById('emp-name').value = emp ? emp.name : '';
             document.getElementById('emp-dept').value = emp ? emp.department : '';
             document.getElementById('employee-modal').classList.remove('hidden');
@@ -446,116 +504,73 @@
             window.closeModal('employee-modal');
         };
 
-        // NEW: Bulk Checkout Logic with Quantities and Stock Validation
         window.openBulkCheckout = (modelName) => {
-            window.currentBulkModel = modelName;
-            window.bulkSelectionMap.clear();
+            window.currentBulkModel = modelName; window.bulkSelectionMap.clear();
             const avail = window.inventory.filter(i => i.name === modelName && i.status === 'available').length;
-            document.getElementById('bulk-checkout-subtitle').innerText = `${modelName}`;
+            document.getElementById('bulk-checkout-subtitle').innerText = `${modelName} AVAILABLE UNITS`;
             document.getElementById('bulk-max-stock').innerText = avail;
-            window.renderBulkStaffList();
-            window.validateBulkStock();
+            window.renderBulkStaffList(); window.validateBulkStock();
             document.getElementById('bulk-checkout-modal').classList.remove('hidden');
         };
 
         window.renderBulkStaffList = (search = '') => {
             const container = document.getElementById('bulk-staff-list');
             const filtered = window.employees.filter(e => !search || e.name.toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
-            
             container.innerHTML = filtered.map(e => {
                 const qty = window.bulkSelectionMap.get(e.id) || 0;
-                return `
-                <div class="flex items-center justify-between p-3 mb-2 rounded-2xl border border-slate-100 bg-white shadow-sm transition-all ${qty > 0 ? 'border-indigo-200 bg-indigo-50/30' : ''}">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded-lg accent-indigo-600">
-                        <div>
-                            <div class="font-bold text-slate-800 text-xs">${e.name}</div>
-                            <div class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">${e.department}</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="changeBulkQty('${e.id}', -1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"><i data-lucide="minus" class="w-3 h-3"></i></button>
-                        <span class="w-6 text-center font-black text-xs text-indigo-700">${qty}</span>
-                        <button onclick="changeBulkQty('${e.id}', 1)" class="w-7 h-7 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"><i data-lucide="plus" class="w-3 h-3"></i></button>
-                    </div>
+                return `<div class="flex items-center justify-between p-5 mb-1 rounded-3xl border bg-white ${qty > 0 ? 'border-[#3c78e6] bg-blue-50/30 ring-2 ring-blue-500/5' : 'border-slate-100'}">
+                    <div class="flex items-center gap-4"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-6 h-6 rounded-lg accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black tracking-widest">${e.department}</div></div></div>
+                    <div class="flex items-center gap-2"><button onclick="changeBulkQty('${e.id}', -1)" class="w-9 h-9 bg-white border border-slate-200 rounded-xl text-slate-400 shadow-sm"><i data-lucide="minus" class="w-4 h-4"></i></button><span class="w-8 text-center font-black text-sm text-[#3c78e6]">${qty}</span><button onclick="changeBulkQty('${e.id}', 1)" class="w-9 h-9 bg-white border border-slate-200 rounded-xl text-slate-400 shadow-sm"><i data-lucide="plus" class="w-4 h-4"></i></button></div>
                 </div>`;
-            }).join('') || '<div class="text-center py-10 text-slate-400 italic">No staff found.</div>';
-            
+            }).join('');
             if (window.lucide) lucide.createIcons();
         };
 
         window.toggleBulkStaff = (id) => {
-            if (window.bulkSelectionMap.has(id)) {
-                window.bulkSelectionMap.delete(id);
-            } else {
-                window.bulkSelectionMap.set(id, 1);
-            }
+            if (window.bulkSelectionMap.has(id)) window.bulkSelectionMap.delete(id);
+            else window.bulkSelectionMap.set(id, 1);
             window.renderBulkStaffList(document.getElementById('bulk-staff-search').value);
             window.validateBulkStock();
         };
 
         window.changeBulkQty = (id, delta) => {
-            let current = window.bulkSelectionMap.get(id) || 0;
-            let next = Math.max(0, current + delta);
-            if (next === 0) window.bulkSelectionMap.delete(id);
-            else window.bulkSelectionMap.set(id, next);
+            let cur = window.bulkSelectionMap.get(id) || 0;
+            let nxt = Math.max(0, cur + delta);
+            if (nxt === 0) window.bulkSelectionMap.delete(id); else window.bulkSelectionMap.set(id, nxt);
             window.renderBulkStaffList(document.getElementById('bulk-staff-search').value);
             window.validateBulkStock();
         };
 
         window.toggleBulkSelectAll = () => {
-            const isAllSelected = window.bulkSelectionMap.size === window.employees.length;
-            if (isAllSelected) {
-                window.bulkSelectionMap.clear();
-            } else {
-                window.employees.forEach(e => window.bulkSelectionMap.set(e.id, 1));
-            }
-            document.getElementById('bulk-select-all-btn').innerText = isAllSelected ? "Select All Staff" : "Deselect All";
+            const isAll = window.bulkSelectionMap.size === window.employees.length;
+            if (isAll) window.bulkSelectionMap.clear();
+            else window.employees.forEach(e => window.bulkSelectionMap.set(e.id, 1));
             window.renderBulkStaffList(document.getElementById('bulk-staff-search').value);
             window.validateBulkStock();
         };
 
         window.validateBulkStock = () => {
-            const totalRequested = Array.from(window.bulkSelectionMap.values()).reduce((a, b) => a + b, 0);
-            const totalAvailable = parseInt(document.getElementById('bulk-max-stock').innerText);
-            
-            const btn = document.getElementById('bulk-execute-btn');
-            const warn = document.getElementById('bulk-stock-warning');
+            const req = Array.from(window.bulkSelectionMap.values()).reduce((a, b) => a + b, 0);
+            const stk = parseInt(document.getElementById('bulk-max-stock').innerText);
             const counter = document.getElementById('bulk-total-requested');
-            
-            counter.innerText = totalRequested;
-            counter.className = totalRequested > totalAvailable ? 'text-red-600 animate-pulse' : 'text-indigo-600';
-
-            if (totalRequested > totalAvailable) {
-                btn.disabled = true;
-                warn.classList.remove('hidden');
-            } else {
-                btn.disabled = totalRequested === 0;
-                warn.classList.add('hidden');
-            }
+            if(counter) counter.innerText = req;
+            const btn = document.getElementById('bulk-execute-btn');
+            if(btn) btn.disabled = (req > stk || req === 0);
+            document.getElementById('bulk-stock-warning')?.classList.toggle('hidden', req <= stk);
         };
 
         window.confirmBulkCheckout = async () => {
             const selections = Array.from(window.bulkSelectionMap.entries());
-            if (!selections.length) return;
-
             const availUnits = window.inventory.filter(i => i.name === window.currentBulkModel && i.status === 'available');
-            let unitIndex = 0;
-
+            let uIdx = 0;
             for (const [empId, qty] of selections) {
+                const empName = window.employees.find(e=>e.id===empId)?.name;
                 for (let i = 0; i < qty; i++) {
-                    const unit = availUnits[unitIndex];
+                    const unit = availUnits[uIdx++];
                     if (!unit) break;
-
-                    const loan = { itemId: unit.id, employeeId: empId, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
-                    if (window.isLocalMode) {
-                        window.checkouts.push({id: 'c'+Date.now()+unitIndex, ...loan});
-                        window.inventory.find(inv=>inv.id===unit.id).status = 'checked-out';
-                    } else {
-                        await setDoc(doc(db, 'checkouts', 'c'+Date.now()+unitIndex), loan);
-                        await updateDoc(doc(db, 'inventory', unit.id), { status: 'checked-out' });
-                    }
-                    unitIndex++;
+                    const loan = { itemId: unit.id, employeeId: empId, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
+                    if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now()+uIdx, ...loan}); window.inventory.find(inv=>inv.id===unit.id).status = 'checked-out'; }
+                    else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()+uIdx), loan); await updateDoc(doc(db, 'inventory', unit.id), { status: 'checked-out' }); }
                 }
             }
             if (window.isLocalMode) persistLocal();
@@ -575,15 +590,16 @@
 
         window.openCheckoutModal = (id) => {
             window.selectedItemId = id; const item = window.inventory.find(i => i.id === id);
-            document.getElementById('modal-item-info').innerText = `${item.name} (${item.lnNumber || 'No ID'})`;
+            document.getElementById('modal-item-info').innerText = `${item.name} | ${item.lnNumber || 'NO ID'}`;
             const s = document.getElementById('modal-employee-select');
-            s.innerHTML = '<option value="">Staff Member...</option>' + window.employees.sort((a,b)=>a.name.localeCompare(b.name)).map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+            s.innerHTML = '<option value="">SEARCH STAFF...</option>' + window.employees.sort((a,b)=>a.name.localeCompare(b.name)).map(e => `<option value="${e.id}">${e.name}</option>`).join('');
             document.getElementById('checkout-modal').classList.remove('hidden');
         };
 
         window.confirmCheckout = async () => {
             const eid = document.getElementById('modal-employee-select').value; if(!eid) return;
-            const loan = { itemId: window.selectedItemId, employeeId: eid, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
+            const empName = window.employees.find(e=>e.id===eid)?.name;
+            const loan = { itemId: window.selectedItemId, employeeId: eid, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
             if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now(), ...loan}); window.inventory.find(i=>i.id===window.selectedItemId).status = 'checked-out'; persistLocal(); }
             else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()), loan); await updateDoc(doc(db, 'inventory', window.selectedItemId), { status: 'checked-out' }); }
             window.closeModal('checkout-modal');
@@ -591,18 +607,31 @@
 
         window.handleReturn = async (lid) => {
             const loan = window.checkouts.find(c => c.id === lid); if (!loan) return;
-            if (window.isLocalMode) { loan.status = 'returned'; window.inventory.find(i => i.id === loan.itemId).status = 'available'; persistLocal(); }
-            else { await updateDoc(doc(db, 'checkouts', lid), { status: 'returned' }); await updateDoc(doc(db, 'inventory', loan.itemId), { status: 'available' }); }
+            if (window.isLocalMode) { loan.status = 'returned'; loan.returnDate = new Date().toISOString().split('T')[0]; window.inventory.find(i => i.id === loan.itemId).status = 'available'; persistLocal(); }
+            else { await updateDoc(doc(db, 'checkouts', lid), { status: 'returned', returnDate: new Date().toISOString().split('T')[0] }); await updateDoc(doc(db, 'inventory', loan.itemId), { status: 'available' }); }
+        };
+
+        window.openUnitHistory = (unitId) => {
+            const unit = window.inventory.find(i => i.id === unitId);
+            document.getElementById('history-modal-title').innerText = `LOGS: ${unit.name}`;
+            document.getElementById('history-th-1').innerText = "BORROWER";
+            const unitLoans = window.checkouts.filter(c => c.itemId === unitId).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
+            document.getElementById('history-table-body').innerHTML = unitLoans.length ? unitLoans.map(h => {
+                const displayName = h.empName || window.employees.find(e => e.id === h.employeeId)?.name || 'Former Staff';
+                return `<tr class="hover:bg-slate-50"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight">${displayName}</div></div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase">${h.status}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest">No previous assignment logs found.</td></tr>';
+            document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
         window.openEmployeeHistory = (id) => {
             const emp = window.employees.find(e => e.id === id);
-            document.getElementById('history-modal-title').innerText = `History: ${emp.name}`;
+            document.getElementById('history-modal-title').innerText = `ROSTER LOG: ${emp.name}`;
+            document.getElementById('history-th-1').innerText = "ITEM DETAILS";
             const history = window.checkouts.filter(c => c.employeeId === id).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
             document.getElementById('history-table-body').innerHTML = history.length ? history.map(h => {
-                const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Asset', lnNumber: 'N/A', serial: 'N/A' };
-                return `<tr><td class="px-6 py-4"><div><div class="text-sm font-bold text-slate-700">${item.name}</div><div class="text-[10px] text-slate-400 uppercase">ID: ${item.lnNumber || 'N/A'} • SN: ${item.serial || 'N/A'}</div></div></td><td class="px-6 py-4 text-xs text-slate-300 font-bold">${h.checkoutDate}</td><td class="px-6 py-4 text-right pr-6 text-xs font-bold ${h.status==='active'?'text-indigo-600':'text-slate-300'}">${h.status.toUpperCase()}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-20 text-center text-slate-400 italic">No history.</td></tr>';
+                const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Item', lnNumber: 'N/A' };
+                return `<tr class="hover:bg-slate-50"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight italic">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1">ID: ${item.lnNumber || 'N/A'}</div></div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic">${h.checkoutDate}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase">${h.status}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-400 font-black text-[10px] uppercase">No logs registered.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
@@ -619,46 +648,73 @@
                 const qLoans = actives.filter(l => {
                     const i = window.inventory.find(inv=>inv.id===l.itemId);
                     const e = window.employees.find(emp=>emp.id===l.employeeId);
-                    return !window.searchQuery || i?.name.toLowerCase().includes(window.searchQuery) || e?.name.toLowerCase().includes(window.searchQuery) || i?.lnNumber?.toLowerCase().includes(window.searchQuery) || i?.serial?.toLowerCase().includes(window.searchQuery);
+                    const bName = l.empName || e?.name;
+                    return !window.searchQuery || i?.name.toLowerCase().includes(window.searchQuery) || bName?.toLowerCase().includes(window.searchQuery) || i?.lnNumber?.toLowerCase().includes(window.searchQuery);
                 });
-                area.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-blue-50', 'text-blue-600')}${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-orange-50', 'text-orange-600')}${renderStatCard('Available', window.inventory.filter(i=>i.status==='available').length, 'check-circle', 'bg-green-50', 'text-green-600')}${renderStatCard('Staff', window.employees.length, 'users', 'bg-indigo-50', 'text-indigo-600')}</div><div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6"><h3 class="font-bold text-slate-800 mb-4">Current Assignments</h3><div class="divide-y divide-slate-50">${qLoans.slice(0,10).map(l => {const i = window.inventory.find(inv=>inv.id===l.itemId); return `<div class="py-3 text-sm flex justify-between items-center"><div><div class="font-bold text-slate-700">${i?.name}</div><div class="text-[10px] text-slate-400 uppercase">${i?.lnNumber || 'No LN'} • ${i?.serial || 'No SN'}</div></div><span class="text-slate-400 font-bold text-xs uppercase">${window.employees.find(e=>e.id===l.employeeId)?.name}</span></div>`}).join('') || '<div class="p-10 text-center text-slate-400 italic">No activity matches search.</div>'}</div></div>`;
+                area.innerHTML = `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                        ${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-slate-100', 'text-black')}
+                        ${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
+                        ${renderStatCard('In Storage', window.inventory.filter(i=>i.status==='available').length, 'check-circle', 'bg-emerald-50', 'text-emerald-600')}
+                        ${renderStatCard('Employees', window.employees.length, 'users', 'bg-blue-50', 'text-[#3c78e6]')}
+                    </div>
+                    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-10">
+                        <h3 class="font-black text-black mb-8 uppercase text-xs tracking-[0.3em] italic border-b border-slate-100 pb-4">Live Overview</h3>
+                        <div class="divide-y divide-slate-50">
+                            ${qLoans.slice(0,12).map(l => {
+                                const i = window.inventory.find(inv=>inv.id===l.itemId);
+                                const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
+                                return `<div class="py-5 text-sm flex justify-between items-center group">
+                                    <div>
+                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors">${i?.name}</div>
+                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
+                                    </div>
+                                    <span class="text-white font-black text-[9px] uppercase tracking-widest bg-black px-4 py-2 rounded-full">${dispBorrower}</span>
+                                </div>`
+                            }).join('') || '<div class="p-10 text-center text-slate-300 italic uppercase font-black text-[10px] tracking-widest">No matching records.</div>'}
+                        </div>
+                    </div>`;
             } else if (window.currentView === 'inventory') {
                 let groups = window.inventory.reduce((acc, i) => { if (!acc[i.name]) acc[i.name] = { name: i.name, count: 0, available: 0, cat: i.category, units: [] }; acc[i.name].count++; if (i.status === 'available') acc[i.name].available++; acc[i.name].units.push(i); return acc; }, {});
                 let list = Object.values(groups);
                 if (window.filters.cat !== 'All') list = list.filter(m => m.cat === window.filters.cat);
                 if (window.searchQuery) {
                     list = list.filter(m => {
-                        const modelMatch = m.name.toLowerCase().includes(window.searchQuery);
-                        const unitMatch = m.units.some(u => (u.lnNumber && u.lnNumber.toLowerCase().includes(window.searchQuery)) || (u.serial && u.serial.toLowerCase().includes(window.searchQuery)));
-                        if (unitMatch) window.expandedInventoryModels.add(m.name);
-                        return modelMatch || unitMatch;
+                        const mMatch = m.name.toLowerCase().includes(window.searchQuery);
+                        const uMatch = m.units.some(u => (u.lnNumber && u.lnNumber.toLowerCase().includes(window.searchQuery)) || (u.serial && u.serial.toLowerCase().includes(window.searchQuery)));
+                        if (uMatch) window.expandedInventoryModels.add(m.name); return mMatch || uMatch;
                     });
                 }
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
-                area.innerHTML = `<div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400"><tr><th class="w-10"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable">Model Name</th><th class="px-6 py-4">Status</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6">Management</th></tr></thead><tbody class="divide-y divide-slate-50">
+                area.innerHTML = `<div class="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b"><tr><th class="w-12"></th><th onclick="toggleSort('name')" class="px-10 py-6 sortable tracking-widest uppercase text-left">Item Info</th><th class="px-10 py-6 tracking-widest uppercase">Status</th><th class="hidden md:table-cell px-10 py-6 text-right pr-10 tracking-widest uppercase">Management</th></tr></thead><tbody class="divide-y divide-slate-50">
                 ${list.map(m => {
                     const isEx = window.expandedInventoryModels.has(m.name);
-                    return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors"><td class="text-center"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-4 h-4 ml-4 text-slate-300"></i></td><td class="px-6 py-4"><div class="font-bold text-slate-800 text-sm">${m.name}</div><div class="text-[10px] font-bold text-slate-300 uppercase">${m.cat}</div></td><td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${m.available>0?'bg-green-50 text-green-700':'bg-red-50 text-red-700'}">${m.available}/${m.count} Avail</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-indigo-600 font-bold text-[10px] uppercase border border-indigo-100 px-3 py-1.5 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm bg-white">Bulk Loan</button>`:''}</td></tr>
+                    return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors"><td class="text-center"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-6 text-slate-300"></i></td><td class="px-10 py-7"><div class="font-black text-black text-sm uppercase italic tracking-tighter">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mt-1">${m.cat}</div></td><td class="px-10 py-7"><span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'}">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-10 py-7 text-right pr-10">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[9px] uppercase tracking-widest bg-black px-6 py-2.5 rounded-full hover:bg-[#CC0000] transition-all shadow-lg">Bulk assignment</button>`:''}</td></tr>
                     ${isEx ? m.units.filter(u => !window.searchQuery || u.lnNumber?.toLowerCase().includes(window.searchQuery) || u.serial?.toLowerCase().includes(window.searchQuery)).map(u => {
                         const loan = actives.find(c => c.itemId === u.id);
-                        const heldBy = loan ? window.employees.find(e => e.id === loan.employeeId)?.name : null;
-                        return `<tr class="bg-slate-50/50"><td></td><td class="px-6 py-4 border-l-4 border-indigo-500"><div class="text-sm font-bold text-slate-700 uppercase">${u.lnNumber || 'NO ID'}</div><div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-4"><span class="text-[10px] font-bold ${u.status==='available'?'text-green-600':'text-orange-600'}">${u.status==='available'?'AVAILABLE':`OUT TO ${heldBy}`}</span></td><td class="px-6 py-4 text-right pr-6 flex justify-end gap-1"><button onclick="openItemModal('${u.id}')" class="p-2 text-slate-300 hover:text-indigo-600"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="initiateDelete('item', '${u.id}')" class="p-2 text-slate-300 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-2 text-indigo-600 font-bold text-[10px] border border-indigo-100 px-3 py-1.5 rounded-xl uppercase active:bg-indigo-600 active:text-white transition-colors shadow-sm bg-white">Loan</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-2 text-indigo-600 font-bold text-[10px] border border-indigo-100 px-3 py-1.5 rounded-xl uppercase active:bg-indigo-600 active:text-white transition-colors shadow-sm bg-white">Return</button>`}</td></tr>`
+                        const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
+                        return `<tr class="bg-slate-50/40"><td></td><td class="px-10 py-6 border-l-[10px] border-black"><div class="text-sm font-black text-slate-800 uppercase tracking-tight">${u.lnNumber || 'NO ID'}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">SN: ${u.serial || 'N/A'}</div></td><td class="px-10 py-6"><span class="text-[9px] font-black tracking-[0.2em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-10 py-6 text-right pr-10 flex justify-end gap-3">
+                            <button onclick="openUnitHistory('${u.id}')" class="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-300 hover:text-black shadow-sm transition-colors" title="Logs"><i data-lucide="history" class="w-4 h-4"></i></button>
+                            <button onclick="openItemModal('${u.id}')" class="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-300 hover:text-black shadow-sm transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                            <button onclick="initiateDelete('item', '${u.id}')" class="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-300 hover:text-[#CC0000] shadow-sm transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-4 text-white font-black text-[9px] uppercase tracking-widest bg-[#3c78e6] px-6 py-2.5 rounded-2xl shadow-xl shadow-blue-500/10 transition-all">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-4 text-white font-black text-[9px] uppercase tracking-widest bg-black px-6 py-2.5 rounded-2xl shadow-xl transition-all">Return</button>`}
+                        </td></tr>`
                     }).join('') : ''}`;
                 }).join('')}</tbody></table></div>`;
             } else if (window.currentView === 'checkouts') {
-                let fLoans = actives.map(l => { const i = window.inventory.find(inv=>inv.id===l.itemId); const e = window.employees.find(emp=>emp.id===l.employeeId); return {...l, iName: i?.name, iCat: i?.category, eName: e?.name, iLn: i?.lnNumber, iSn: i?.serial}; });
+                let fLoans = actives.map(l => { const i = window.inventory.find(inv=>inv.id===l.itemId); return {...l, iName: i?.name, iCat: i?.category, iLn: i?.lnNumber, iSn: i?.serial}; });
                 if (window.filters.cat !== 'All') fLoans = fLoans.filter(l => l.iCat === window.filters.cat);
                 if (window.searchQuery) {
                     fLoans = fLoans.filter(l => {
-                        const m = l.iName?.toLowerCase().includes(window.searchQuery) || l.eName?.toLowerCase().includes(window.searchQuery) || l.iLn?.toLowerCase().includes(window.searchQuery) || l.iSn?.toLowerCase().includes(window.searchQuery);
-                        if (m) window.expandedEmployees.add(l.employeeId); return m;
+                        const match = l.iName?.toLowerCase().includes(window.searchQuery) || l.empName?.toLowerCase().includes(window.searchQuery) || l.iLn?.toLowerCase().includes(window.searchQuery) || l.iSn?.toLowerCase().includes(window.searchQuery);
+                        if (match) window.expandedEmployees.add(l.employeeId); return match;
                     });
                 }
-                const grouped = fLoans.reduce((acc, l) => { if(!acc[l.employeeId]) acc[l.employeeId] = { eName: l.eName, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
-                area.innerHTML = `<div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400"><tr><th class="w-10"></th><th class="px-6 py-4">Employee</th><th class="px-6 py-4 text-right pr-6">Items</th></tr></thead><tbody class="divide-y divide-slate-50">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer"><td><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-4 h-4 ml-4 text-slate-300"></i></td><td class="px-6 py-4 font-bold text-slate-800 text-sm">${grouped[id].eName}</td><td class="px-6 py-4 text-right font-bold text-indigo-600 text-xs">${grouped[id].loans.length}</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/50"><td></td><td class="px-6 py-4"><div class="text-xs font-bold text-slate-600 uppercase tracking-tighter">${l.iName}</div><div class="text-[9px] text-slate-400 mt-0.5 uppercase">LN: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-4 text-right"><button onclick="handleReturn('${l.id}')" class="text-indigo-600 font-bold text-[10px] border border-indigo-100 px-2.5 py-1.5 rounded-lg active:bg-indigo-600 active:text-white transition-colors bg-white shadow-sm">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-20 text-center text-slate-400">No active loans found.</td></tr>'}</tbody></table></div>`;
+                const grouped = fLoans.reduce((acc, l) => { if(!acc[l.employeeId]) acc[l.employeeId] = { eName: l.empName || window.employees.find(e=>e.id===l.employeeId)?.name, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
+                area.innerHTML = `<div class="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b"><tr><th class="w-12"></th><th class="px-10 py-6 tracking-widest uppercase text-left">Borrower Name</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-4 h-4 ml-6 text-slate-200"></i></td><td class="px-10 py-7 font-black text-black text-sm uppercase italic tracking-tighter">${grouped[id].eName || 'User'}</td><td class="px-10 py-7 text-right font-black text-[#CC0000] text-sm italic pr-10">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40"><td></td><td class="px-10 py-6 border-l-[10px] border-black"><div class="text-xs font-black text-slate-700 uppercase tracking-widest">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-1 tracking-[0.15em]">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-10 py-6 text-right pr-10"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[9px] uppercase tracking-widest bg-black px-6 py-2.5 rounded-full shadow-lg">MARK RETURNED</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-20 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic">No active loan records.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col gap-4 relative"><div class="absolute top-4 right-4 flex gap-1"><button onclick="openEmployeeModal('${e.id}')" class="p-1.5 text-slate-300 hover:text-indigo-600 transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-1.5 text-slate-300 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div><div class="font-bold text-lg text-slate-800 leading-tight pr-10">${e.name}</div><div class="text-[10px] text-slate-400 uppercase font-bold tracking-widest mt-1">${e.department || 'General'}</div><div class="text-[11px] font-bold text-indigo-600 mt-2 bg-indigo-50 inline-block px-2 py-0.5 rounded-md uppercase">${heldCount} Items Held</div></div><button onclick="openEmployeeHistory('${e.id}')" class="w-full py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-bold text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2"><i data-lucide="history" class="w-3.5 h-3.5"></i> VIEW HISTORY</button></div>`}).join('')}</div>`;
+                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-8">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col gap-8 relative group"><div class="absolute top-8 right-8 flex gap-3"><button onclick="openEmployeeModal('${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div><div><div class="w-16 h-16 bg-slate-100 text-black rounded-[1.5rem] flex items-center justify-center font-black text-2xl mb-6 shadow-inner italic">${e.name[0]}</div><div class="font-black text-xl text-black leading-tight uppercase tracking-tighter italic">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.2em] mt-2">${e.department || 'General Staff'}</div><div class="text-[10px] font-black text-white mt-6 bg-[#CC0000] inline-block px-5 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-red-500/20">${heldCount} Assets Held</div></div><button onclick="openEmployeeHistory('${e.id}')" class="w-full py-5 bg-black border-none rounded-3xl text-[10px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"><i data-lucide="history" class="w-4 h-4"></i> Personal Log</button></div>`}).join('')}</div>`;
             }
             if (window.lucide) lucide.createIcons();
         };
