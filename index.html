@@ -39,22 +39,23 @@
         .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
-<body class="bg-[#f2f2f2] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
+<body class="bg-[#f2f2f2] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 text-left">
 
     <div id="loading-overlay">
         <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
+        <p class="text-black font-black uppercase tracking-tighter text-xl italic text-left">EquipTrack</p>
         <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Asset Database...</p>
         <button id="bypass-btn" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full hidden">Local Bypass</button>
     </div>
 
     <input type="file" id="system-restore-input" class="hidden" accept=".xlsx" onchange="processSystemRestore(this)">
 
+    <!-- Sidebar (Desktop) -->
     <aside class="hidden md:flex w-64 bg-[#CC0000] flex-col h-screen sticky top-0 shadow-2xl overflow-hidden">
         <div class="p-6 cursor-pointer group" onclick="setView('dashboard')">
             <div class="flex items-center gap-2">
-                <i data-lucide="package" class="text-white w-7 h-7 group-hover:rotate-12 transition-transform"></i>
-                <h1 class="font-black text-2xl text-white italic tracking-tighter leading-none">EquipTrack</h1>
+                <i data-lucide="package" class="text-white w-7 h-7 group-hover:rotate-12 transition-transform text-left"></i>
+                <h1 class="font-black text-2xl text-white italic tracking-tighter leading-none text-left">EquipTrack</h1>
             </div>
         </div>
         
@@ -92,6 +93,7 @@
         </div>
     </aside>
 
+    <!-- Header (Mobile) -->
     <header class="md:hidden bg-[#CC0000] px-5 py-4 sticky top-0 z-40 flex items-center justify-between shadow-xl">
         <div class="flex items-center gap-2 cursor-pointer" onclick="setView('dashboard')">
             <h1 class="font-black text-xl text-white italic tracking-tighter uppercase text-left">EquipTrack</h1>
@@ -101,32 +103,32 @@
 
     <main class="flex-1 p-4 md:p-6 overflow-y-auto">
         <header class="mb-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center gap-4 flex-1">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-left">
+                <div class="flex items-center gap-4 flex-1 text-left">
                     <div class="relative flex-1 max-w-xl text-left">
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                        <input type="text" id="search-input" placeholder="Search items, serials, staff..." class="w-full pl-11 pr-6 py-3 bg-white border-none rounded-xl text-sm font-medium shadow-sm focus:ring-4 focus:ring-black/5 outline-none" oninput="handleSearch(this.value)" />
+                        <input type="text" id="search-input" placeholder="Search items, serials, staff..." class="w-full pl-11 pr-6 py-3 bg-white border-none rounded-xl text-sm font-medium shadow-sm focus:ring-4 focus:ring-black/5 outline-none text-left" oninput="handleSearch(this.value)" />
                     </div>
                     
-                    <div class="hidden md:block relative">
-                        <button id="add-new-btn" onclick="toggleAddDropdown(event)" class="bg-[#3c78e6] hover:bg-[#2a5bbd] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20">
-                            <i data-lucide="plus" class="w-4 h-4"></i> Add New
+                    <div class="hidden md:block relative text-left">
+                        <button id="add-new-btn" onclick="toggleAddDropdown(event)" class="bg-[#3c78e6] hover:bg-[#2a5bbd] text-white px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-lg shadow-blue-500/20 text-left">
+                            <i data-lucide="plus" class="w-4 h-4 text-left"></i> Add New
                         </button>
                         <div id="add-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-black rounded-2xl shadow-2xl z-[100] p-1.5 border border-white/10 text-left">
-                            <button onclick="openItemModal();" class="flex items-center gap-3 w-full px-4 py-2 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-lg transition-colors">
-                                <i data-lucide="box" class="w-4 h-4 text-[#CC0000]"></i> Inventory Item
+                            <button onclick="openItemModal();" class="flex items-center gap-3 w-full px-4 py-2 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-lg transition-colors text-left">
+                                <i data-lucide="box" class="w-4 h-4 text-[#CC0000] text-left"></i> Inventory Item
                             </button>
-                            <button onclick="openEmployeeModal();" class="flex items-center gap-3 w-full px-4 py-2 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-lg transition-colors mt-1">
-                                <i data-lucide="users" class="w-4 h-4 text-[#CC0000]"></i> Employee Record
+                            <button onclick="openEmployeeModal();" class="flex items-center gap-3 w-full px-4 py-2 text-xs font-black text-white uppercase tracking-widest hover:bg-white/10 rounded-lg transition-colors mt-1 text-left">
+                                <i data-lucide="users" class="w-4 h-4 text-[#CC0000] text-left"></i> Employee Record
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="filter-toolbar" class="flex items-center">
-                    <div class="bg-white text-black border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-2 shadow-sm">
-                        <i data-lucide="filter" class="w-3.5 h-3.5 text-[#CC0000]"></i>
-                        <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-slate-900 border-none ring-0">
+                <div id="filter-toolbar" class="flex items-center text-left">
+                    <div class="bg-white text-black border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-2 shadow-sm text-left">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-[#CC0000] text-left"></i>
+                        <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-slate-700 border-none ring-0 text-left">
                             <option value="All">All Categories</option>
                             <option value="Laptop">Laptop</option>
                             <option value="Docking Station">Docking Station</option>
@@ -139,122 +141,150 @@
             </div>
         </header>
 
-        <div id="content-area" class="space-y-4 text-left"></div>
+        <div id="content-area" class="space-y-4 text-left text-left"></div>
     </main>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-black flex justify-around items-center z-40 pb-safe shadow-2xl">
-        <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40">
-            <i data-lucide="layout-dashboard" class="w-5 h-5 mb-1"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Home</span>
+    <!-- Mobile Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-black flex justify-around items-center z-40 pb-safe shadow-2xl text-left">
+        <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40 text-left">
+            <i data-lucide="layout-dashboard" class="w-5 h-5 mb-1 text-left text-left text-left"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest text-left">Home</span>
         </button>
-        <button onclick="setView('inventory')" data-m-view="inventory" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40">
-            <i data-lucide="layers" class="w-5 h-5 mb-1"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Items</span>
+        <button onclick="setView('inventory')" data-m-view="inventory" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40 text-left">
+            <i data-lucide="layers" class="w-5 h-5 mb-1 text-left text-left text-left"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest text-left">Items</span>
         </button>
-        <button onclick="setView('checkouts')" data-m-view="checkouts" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40">
-            <i data-lucide="clock" class="w-5 h-5 mb-1"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Loans</span>
+        <button onclick="setView('checkouts')" data-m-view="checkouts" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40 text-left">
+            <i data-lucide="clock" class="w-5 h-5 mb-1 text-left text-left text-left text-left text-left"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest text-left">Loans</span>
         </button>
-        <button onclick="setView('employees')" data-m-view="employees" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40">
-            <i data-lucide="users" class="w-5 h-5 mb-1"></i>
-            <span class="text-[8px] font-black uppercase tracking-widest">Staff</span>
+        <button onclick="setView('employees')" data-m-view="employees" class="mobile-nav-btn flex flex-col items-center py-4 px-4 text-white/40 text-left">
+            <i data-lucide="users" class="w-5 h-5 mb-1 text-left text-left text-left"></i>
+            <span class="text-[8px] font-black uppercase tracking-widest text-left">Staff</span>
         </button>
     </nav>
 
-    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[8px] border-t-[#CC0000]">
-            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white">
-                <h3 class="text-2xl font-black text-black italic tracking-tighter">ITEM ENTRY</h3>
-                <button onclick="closeModal('item-modal')" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
+    <!-- Mobile Floating Add Button -->
+    <button onclick="toggleMobileAddMenu()" class="md:hidden fixed bottom-24 right-6 w-14 h-14 bg-[#3c78e6] text-white rounded-full shadow-2xl flex items-center justify-center z-50 text-left">
+        <i data-lucide="plus" class="w-7 h-7 text-left text-left text-left"></i>
+    </button>
+
+    <!-- Mobile Add Menu -->
+    <div id="mobile-add-menu" class="fixed inset-0 z-[60] hidden text-left">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="toggleMobileAddMenu()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-[3rem] p-10 pb-16 animate-slide-up border-t-8 border-t-[#CC0000] text-left">
+            <div class="w-16 h-1.5 bg-slate-100 rounded-full mx-auto mb-10 text-left"></div>
+            <div class="grid grid-cols-2 gap-6 text-left">
+                <button onclick="openItemModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform text-left">
+                    <div class="w-16 h-16 bg-[#CC0000] text-white rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-red-500/20 text-left"><i data-lucide="box" class="w-8 h-8 text-left text-left text-left"></i></div>
+                    <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Item</span>
+                </button>
+                <button onclick="openEmployeeModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform text-left">
+                    <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl text-left"><i data-lucide="user-plus" class="w-8 h-8 text-left text-left text-left text-left"></i></div>
+                    <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Staff</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[8px] border-t-[#CC0000] text-left">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white text-left">
+                <h3 class="text-2xl font-black text-black italic tracking-tighter text-left">ITEM ENTRY</h3>
+                <button onclick="closeModal('item-modal')" class="p-2 bg-slate-50 rounded-full text-left"><i data-lucide="x" class="w-4 h-4 text-slate-400 text-left"></i></button>
             </div>
             <div class="p-6 space-y-4 text-left">
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="col-span-2">
-                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Model Name</label>
-                        <input type="text" id="item-name" list="model-suggestions" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none" />
+                <div class="grid grid-cols-3 gap-4 text-left">
+                    <div class="col-span-2 text-left">
+                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 text-left text-left">Model Name</label>
+                        <input type="text" id="item-name" list="model-suggestions" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none text-left" />
                         <datalist id="model-suggestions"></datalist>
                     </div>
-                    <div><label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Qty</label><input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none" /></div>
+                    <div class="text-left"><label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 text-left text-left">Qty</label><input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none text-left" /></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Category</label><select id="item-category" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none"><option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option></select></div>
-                    <div><label id="ln-label" class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">Laptop ID</label><input type="text" id="item-ln" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none" /></div>
+                <div class="grid grid-cols-2 gap-4 text-left">
+                    <div class="text-left"><label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1 text-left text-left text-left">Category</label><select id="item-category" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none text-left"><option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option></select></div>
+                    <div class="text-left"><label id="ln-label" class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest text-left text-left text-left text-left">Laptop ID</label><input type="text" id="item-ln" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none text-left" /></div>
                 </div>
-                <div><label id="sn-label" class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">Serial Number</label><input type="text" id="item-serial" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none" /></div>
+                <div class="text-left"><label id="sn-label" class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest text-left text-left text-left text-left">Serial Number</label><input type="text" id="item-serial" class="w-full p-3 bg-slate-100 border-none rounded-xl text-sm font-bold outline-none text-left" /></div>
                 
-                <div id="assign-field-container">
-                    <label class="block text-[9px] font-black text-[#3c78e6] uppercase tracking-widest mb-1.5 ml-1">Initial Assignment (Optional)</label>
-                    <select id="item-assign-to" class="w-full p-3 bg-blue-50 border-none rounded-xl text-sm font-bold outline-none text-[#3c78e6]"></select>
+                <div id="assign-field-container text-left">
+                    <label class="block text-[9px] font-black text-[#3c78e6] uppercase tracking-widest mb-1.5 ml-1 text-left text-left">Initial Assignment (Optional)</label>
+                    <select id="item-assign-to" class="w-full p-3 bg-blue-50 border-none rounded-xl text-sm font-bold outline-none text-[#3c78e6] text-left"></select>
                 </div>
 
-                <p id="bulk-warning" class="hidden text-[10px] text-[#CC0000] font-black bg-red-50 p-4 rounded-xl leading-relaxed uppercase border border-red-100 italic">Bulk mode: Assignment and ID fields disabled. Update details in Inventory view.</p>
+                <p id="bulk-warning" class="hidden text-[10px] text-[#CC0000] font-black bg-red-50 p-4 rounded-xl leading-relaxed uppercase border border-red-100 italic text-left">Bulk mode: Assignment and ID fields disabled. Update details in Inventory view.</p>
             </div>
-            <div class="p-6 bg-slate-50 flex gap-4"><button onclick="closeModal('item-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="saveItem()" class="flex-1 py-4 bg-black text-white rounded-xl font-black uppercase text-xs tracking-widest">Save</button></div>
+            <div class="p-6 bg-slate-50 flex gap-4 text-left"><button onclick="closeModal('item-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400 text-left">Cancel</button><button onclick="saveItem()" class="flex-1 py-4 bg-black text-white rounded-xl font-black uppercase text-xs tracking-widest text-left">Save</button></div>
         </div>
     </div>
 
-    <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[8px] border-t-[#3c78e6]">
+    <!-- Bulk Checkout Modal -->
+    <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4 text-left">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[8px] border-t-[#3c78e6] text-left">
             <div class="p-6 border-b border-slate-50 bg-white flex justify-between items-center text-left">
                 <div class="text-left">
-                    <h3 class="text-2xl font-black text-black italic tracking-tighter uppercase text-left">Bulk Assignment</h3>
-                    <p id="bulk-checkout-subtitle" class="text-[10px] text-[#3c78e6] font-black mt-1 uppercase tracking-widest"></p>
+                    <h3 class="text-2xl font-black text-black italic tracking-tighter uppercase text-left text-left">Bulk Assignment</h3>
+                    <p id="bulk-checkout-subtitle" class="text-[10px] text-[#3c78e6] font-black mt-1 uppercase tracking-widest text-left text-left"></p>
                 </div>
-                <button onclick="toggleBulkSelectAll()" id="bulk-select-all-btn" class="px-5 py-2 bg-slate-100 text-black rounded-lg text-[9px] font-black uppercase tracking-widest">Select All Staff</button>
+                <button onclick="toggleBulkSelectAll()" id="bulk-select-all-btn" class="px-5 py-2 bg-slate-100 text-black rounded-lg text-[9px] font-black uppercase tracking-widest text-left">Select All Staff</button>
             </div>
-            <div class="p-4 border-b bg-slate-50 text-left">
-                <div class="relative"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300"></i><input type="text" id="bulk-staff-search" placeholder="Search staff members..." oninput="renderBulkStaffList(this.value)" class="w-full pl-11 pr-4 py-3 bg-white border-none rounded-xl text-sm font-bold outline-none shadow-sm" /></div>
+            <div class="p-4 border-b bg-slate-50 text-left text-left">
+                <div class="relative text-left text-left text-left"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 text-left text-left"></i><input type="text" id="bulk-staff-search" placeholder="Search staff members..." oninput="renderBulkStaffList(this.value)" class="w-full pl-11 pr-4 py-3 bg-white border-none rounded-xl text-sm font-bold outline-none shadow-sm text-left text-left" /></div>
             </div>
-            <div class="overflow-y-auto flex-1 p-4 grid grid-cols-1 md:grid-cols-2 gap-2 text-left" id="bulk-staff-list"></div>
-            <div id="bulk-stock-warning" class="hidden px-6 py-2 bg-red-600 text-white text-[9px] font-black text-center uppercase tracking-widest">ERROR: STOCK EXCEEDED</div>
-            <div class="p-6 bg-white border-t flex items-center justify-between">
-                <div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Allocated</p><p class="text-xl font-black text-black"><span id="bulk-total-requested">0</span> <span class="text-slate-200">/</span> <span id="bulk-max-stock" class="text-[#3c78e6]">0</span></p></div>
-                <div class="flex gap-3"><button onclick="closeModal('bulk-checkout-modal')" class="px-6 py-3 font-black uppercase text-[10px] tracking-widest text-slate-400">Abort</button><button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-8 py-3 bg-[#3c78e6] text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg disabled:opacity-20">Execute</button></div>
+            <div class="overflow-y-auto flex-1 p-4 grid grid-cols-1 md:grid-cols-2 gap-2 text-left text-left text-left" id="bulk-staff-list"></div>
+            <div id="bulk-stock-warning" class="hidden px-6 py-2 bg-red-600 text-white text-[9px] font-black text-center uppercase tracking-widest text-left">ERROR: STOCK EXCEEDED</div>
+            <div class="p-6 bg-white border-t flex items-center justify-between text-left">
+                <div class="text-left text-left"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Allocated</p><p class="text-xl font-black text-black text-left"><span id="bulk-total-requested" class="text-left">0</span> <span class="text-slate-200 text-left">/</span> <span id="bulk-max-stock" class="text-[#3c78e6] text-left text-left">0</span></p></div>
+                <div class="flex gap-3 text-left"><button onclick="closeModal('bulk-checkout-modal')" class="px-6 py-3 font-black uppercase text-[10px] tracking-widest text-slate-400 text-left">Abort</button><button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-8 py-3 bg-[#3c78e6] text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg disabled:opacity-20 text-left">Execute</button></div>
             </div>
         </div>
     </div>
 
-    <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[8px] border-t-black">
-            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white text-left">
-                <h3 id="history-modal-title" class="text-2xl font-black italic text-black tracking-tighter uppercase text-left">HISTORY</h3>
-                <button onclick="closeModal('history-modal')" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[8px] border-t-black text-left">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white text-left text-left">
+                <h3 id="history-modal-title" class="text-2xl font-black italic text-black tracking-tighter uppercase text-left text-left">HISTORY</h3>
+                <button onclick="closeModal('history-modal')" class="p-2 bg-slate-50 rounded-full text-left text-left"><i data-lucide="x" class="w-4 h-4 text-slate-400 text-left text-left"></i></button>
             </div>
-            <div class="overflow-y-auto flex-1"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 sticky top-0 z-10 border-b"><tr><th id="history-th-1" class="px-6 py-4 tracking-widest">Entity</th><th class="px-6 py-4 tracking-widest">Timeline</th><th class="px-6 py-4 text-right pr-6 tracking-widest">Status</th></tr></thead><tbody id="history-table-body" class="divide-y divide-slate-100"></tbody></table></div>
+            <div class="overflow-y-auto flex-1 text-left"><table class="w-full text-left text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 sticky top-0 z-10 border-b text-left"><tr><th id="history-th-1" class="px-6 py-4 tracking-widest text-left">Entity</th><th class="px-6 py-4 tracking-widest text-left">Timeline</th><th class="px-6 py-4 text-right pr-6 tracking-widest text-left">Status</th></tr></thead><tbody id="history-table-body" class="divide-y divide-slate-100 text-left text-left text-left"></tbody></table></div>
         </div>
     </div>
 
-    <div id="employee-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[8px] border-t-black">
-            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white text-left">
-                <h3 id="employee-modal-title" class="text-2xl font-black text-black italic tracking-tighter uppercase text-left">EMPLOYEE DATA</h3>
-                <button onclick="closeModal('employee-modal')" class="p-3 bg-slate-50 rounded-full"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+    <!-- CRUD Forms -->
+    <div id="employee-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[8px] border-t-black text-left">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white text-left text-left">
+                <h3 id="employee-modal-title" class="text-2xl font-black text-black italic tracking-tighter uppercase text-left text-left">EMPLOYEE DATA</h3>
+                <button onclick="closeModal('employee-modal')" class="p-3 bg-slate-50 rounded-full text-left text-left text-left"><i data-lucide="x" class="w-5 h-5 text-slate-400 text-left text-left text-left"></i></button>
             </div>
-            <div class="p-6 space-y-4 text-left">
-                <input type="text" id="emp-name" placeholder="FULL NAME" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5" />
-                <input type="text" id="emp-dept" placeholder="DEPARTMENT" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5" />
+            <div class="p-6 space-y-4 text-left text-left">
+                <input type="text" id="emp-name" placeholder="FULL NAME" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5 text-left text-left" />
+                <input type="text" id="emp-dept" placeholder="DEPARTMENT" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5 text-left text-left" />
             </div>
-            <div class="p-6 bg-slate-50 flex gap-4"><button onclick="closeModal('employee-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="saveEmployee()" class="flex-1 py-4 bg-black text-white rounded-xl font-black uppercase text-xs tracking-widest">Update</button></div>
+            <div class="p-6 bg-slate-50 flex gap-4 text-left text-left"><button onclick="closeModal('employee-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400 text-left text-left">Cancel</button><button onclick="saveEmployee()" class="flex-1 py-4 bg-black text-white rounded-xl font-black uppercase text-xs tracking-widest text-left text-left text-left">Update</button></div>
         </div>
     </div>
 
     <div id="checkout-modal" class="fixed inset-0 modal-backdrop z-[110] hidden flex items-end md:items-center justify-center p-0 md:p-4 text-left">
-        <div class="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0 border-t-[12px] border-t-[#3c78e6]">
-            <div class="p-6 border-b border-slate-50 bg-white"><h3 class="text-3xl font-black italic text-black uppercase">Assign Item</h3><p id="modal-item-info" class="text-xs text-[#3c78e6] font-black mt-2 uppercase tracking-widest leading-relaxed"></p></div>
-            <div class="p-6 space-y-6">
-                <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 italic">Select Borrower</label><select id="modal-employee-select" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10"></select></div>
-                <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 italic">Due Date</label><input type="date" id="modal-due-date" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10" /></div>
+        <div class="bg-white rounded-t-[3rem] md:rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden pb-10 md:pb-0 border-t-[12px] border-t-[#3c78e6] text-left text-left text-left">
+            <div class="p-6 border-b border-slate-50 bg-white text-left text-left text-left"><h3 class="text-3xl font-black italic text-black uppercase text-left text-left text-left">Assign Item</h3><p id="modal-item-info" class="text-xs text-[#3c78e6] font-black mt-2 uppercase tracking-widest leading-relaxed text-left text-left text-left text-left"></p></div>
+            <div class="p-6 space-y-6 text-left text-left text-left text-left">
+                <div class="text-left"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 italic text-left text-left text-left">Select Borrower</label><select id="modal-employee-select" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10 text-left text-left text-left"></select></div>
+                <div class="text-left text-left"><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 italic text-left text-left text-left text-left">Due Date</label><input type="date" id="modal-due-date" class="w-full p-4 bg-slate-100 border-none rounded-xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10 text-left text-left text-left text-left" /></div>
             </div>
-            <div class="p-6 flex gap-4 bg-slate-50"><button onclick="closeModal('checkout-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="confirmCheckout()" class="flex-1 py-4 bg-[#3c78e6] text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20">Finalize</button></div>
+            <div class="p-6 flex gap-4 bg-slate-50 text-left text-left text-left text-left"><button onclick="closeModal('checkout-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400 text-left text-left text-left">Cancel</button><button onclick="confirmCheckout()" class="flex-1 py-4 bg-[#3c78e6] text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20 text-left text-left text-left text-left">Finalize</button></div>
         </div>
     </div>
 
-    <div id="delete-modal" class="fixed inset-0 modal-backdrop z-[200] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden p-8 text-center">
-            <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><i data-lucide="trash-2" class="w-8 h-8"></i></div>
-            <h3 class="text-2xl font-black text-slate-800 mb-2 tracking-tight uppercase">Confirm Delete</h3>
-            <p class="text-slate-400 text-sm mb-6 leading-relaxed">This record will be purged forever.</p>
-            <div class="flex gap-4"><button onclick="closeModal('delete-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest bg-slate-50 rounded-xl text-slate-400">Abort</button><button onclick="confirmDelete()" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg">Purge</button></div>
+    <div id="delete-modal" class="fixed inset-0 modal-backdrop z-[200] hidden flex items-center justify-center p-4 text-left">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden p-8 text-center text-left text-left">
+            <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner text-left text-left"><i data-lucide="trash-2" class="w-8 h-8 text-left text-left text-left text-left"></i></div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2 tracking-tight uppercase text-left text-left text-left">Confirm Delete</h3>
+            <p class="text-slate-400 text-sm mb-6 leading-relaxed text-left text-left text-left">This record will be purged forever.</p>
+            <div class="flex gap-4 text-left text-left text-left"><button onclick="closeModal('delete-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest bg-slate-50 rounded-xl text-slate-400 text-left text-left text-left">Abort</button><button onclick="confirmDelete()" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg text-left text-left text-left">Purge</button></div>
         </div>
     </div>
 
@@ -272,7 +302,7 @@
           appId: "1:1086542719557:web:49d7318c74e59e5050d12c"
         };
 
-        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic">${v}</p></div></div>`;
+        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6 text-left text-left"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none text-left text-left text-left">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic text-left text-left text-left text-left">${v}</p></div></div>`;
 
         window.currentView = 'dashboard';
         window.searchQuery = '';
@@ -306,7 +336,9 @@
         const setupListeners = () => {
             const check = () => { 
                 const d = document.getElementById('status-dot');
-                if(d) d.className = 'w-2 h-2 rounded-full bg-white animate-pulse';
+                const md = document.getElementById('mobile-status-dot');
+                if(d) d.className = 'w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]';
+                if(md) md.className = 'w-2.5 h-2.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white] border-2 border-white/20';
                 const st = document.getElementById('status-text');
                 if (st) st.innerText = "Synced Online";
                 window.dismissLoading(); window.render(); 
@@ -335,7 +367,7 @@
                     const json = XLSX.utils.sheet_to_json(ws);
                     for (const row of json) {
                         const entry = {}; fm.forEach(f => entry[f.local] = row[f.excel] || "");
-                        const id = row.ID || Date.now().toString() + Math.random();
+                        const id = row.ID || (Date.now().toString() + Math.random());
                         if (window.isLocalMode) window[col].push({id, ...entry}); else await setDoc(doc(db, col, id.toString()), entry);
                     }
                 };
@@ -384,7 +416,6 @@
             document.getElementById('item-ln').value = item ? item.lnNumber : '';
             document.getElementById('item-serial').value = item ? item.serial : '';
             
-            // Populate employee list for initial assignment
             const assignSel = document.getElementById('item-assign-to');
             assignSel.innerHTML = '<option value="">(None - Available)</option>' + 
                 window.employees.sort((a,b)=>a.name.localeCompare(b.name))
@@ -393,7 +424,8 @@
             
             window.handleBulkInputToggle(1);
             const models = [...new Set(window.inventory.map(i => i.name))].sort();
-            document.getElementById('model-suggestions').innerHTML = models.map(m => `<option value="${m}">`).join('');
+            const suggestions = document.getElementById('model-suggestions');
+            if (suggestions) suggestions.innerHTML = models.map(m => `<option value="${m}">`).join('');
             document.getElementById('item-modal').classList.remove('hidden'); 
         };
 
@@ -477,8 +509,8 @@
             container.innerHTML = filtered.map(e => {
                 const qty = window.bulkSelectionMap.get(e.id) || 0;
                 return `<div class="flex items-center justify-between p-4 rounded-2xl border bg-white ${qty > 0 ? 'border-[#3c78e6] bg-blue-50/30' : 'border-slate-100'}">
-                    <div class="flex items-center gap-3"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black">${e.department}</div></div></div>
-                    <div class="flex items-center gap-2"><button onclick="changeBulkQty('${e.id}', -1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400"><i data-lucide="minus" class="w-4 h-4"></i></button><span class="w-6 text-center font-black text-sm text-[#3c78e6]">${qty}</span><button onclick="changeBulkQty('${e.id}', 1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400"><i data-lucide="plus" class="w-4 h-4"></i></button></div>
+                    <div class="flex items-center gap-3 text-left"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight text-left">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black text-left">${e.department}</div></div></div>
+                    <div class="flex items-center gap-2"><button onclick="changeBulkQty('${e.id}', -1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="minus" class="w-4 h-4 text-left"></i></button><span class="w-6 text-center font-black text-sm text-[#3c78e6]">${qty}</span><button onclick="changeBulkQty('${e.id}', 1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="plus" class="w-4 h-4 text-left"></i></button></div>
                 </div>`;
             }).join('');
             if (window.lucide) lucide.createIcons();
@@ -494,7 +526,8 @@
         window.changeBulkQty = (id, delta) => {
             let cur = window.bulkSelectionMap.get(id) || 0;
             let nxt = Math.max(0, cur + delta);
-            if (nxt === 0) window.bulkSelectionMap.delete(id); else window.bulkSelectionMap.set(id, nxt);
+            if (nxt === 0) window.bulkSelectionMap.delete(id); 
+            else window.bulkSelectionMap.set(id, nxt);
             window.renderBulkStaffList(document.getElementById('bulk-staff-search').value);
             window.validateBulkStock();
         };
@@ -509,8 +542,7 @@
 
         window.validateBulkStock = () => {
             const req = Array.from(window.bulkSelectionMap.values()).reduce((a, b) => a + b, 0);
-            const stkValue = document.getElementById('bulk-max-stock').innerText;
-            const stk = parseInt(stkValue) || 0;
+            const stk = parseInt(document.getElementById('bulk-max-stock').innerText) || 0;
             const counter = document.getElementById('bulk-total-requested');
             if(counter) counter.innerText = req;
             const btn = document.getElementById('bulk-execute-btn');
@@ -579,20 +611,19 @@
             const unitLoans = window.checkouts.filter(c => c.itemId === unitId).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
             document.getElementById('history-table-body').innerHTML = unitLoans.length ? unitLoans.map(h => {
                 const displayName = h.empName || window.employees.find(e => e.id === h.employeeId)?.name || 'Former Staff';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div></div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase">${h.status}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[10px] uppercase">No assignment history found.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div></div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase text-right">${h.status}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[10px] uppercase text-left">No assignment history found.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
         window.openEmployeeHistory = (id) => {
             const emp = window.employees.find(e => e.id === id);
             document.getElementById('history-modal-title').innerText = `STAFF LOG: ${emp.name}`;
-            document.getElementById('history-th-1').innerText = "ITEM DETAILS";
             const history = window.checkouts.filter(c => c.employeeId === id).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
             document.getElementById('history-table-body').innerHTML = history.length ? history.map(h => {
                 const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Item', lnNumber: 'N/A' };
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'}</div></div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase">${h.status}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-400 font-black text-[10px] uppercase">No logs registered.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left text-left">ID: ${item.lnNumber || 'N/A'}</div></div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left text-left">${h.checkoutDate}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-200'} tracking-[0.2em] uppercase text-right text-right">${h.status}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
@@ -613,26 +644,26 @@
                     return !window.searchQuery || i?.name.toLowerCase().includes(window.searchQuery) || bName.includes(window.searchQuery) || i?.lnNumber?.toLowerCase().includes(window.searchQuery);
                 });
                 area.innerHTML = `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left text-left">
                         ${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-slate-100', 'text-black')}
                         ${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
                         ${renderStatCard('In Storage', window.inventory.filter(i=>i.status==='available').length, 'check-circle', 'bg-emerald-50', 'text-emerald-600')}
                         ${renderStatCard('Employees', window.employees.length, 'users', 'bg-blue-50', 'text-[#3c78e6]')}
                     </div>
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-left">
-                        <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3 text-left">Live Overview</h3>
-                        <div class="divide-y divide-slate-50 text-left">
+                        <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3 text-left text-left">Live Overview</h3>
+                        <div class="divide-y divide-slate-50 text-left text-left">
                             ${qLoans.slice(0,12).map(l => {
                                 const i = window.inventory.find(inv=>inv.id===l.itemId);
                                 const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
-                                return `<div class="py-3.5 text-sm flex justify-between items-center group text-left">
-                                    <div class="text-left">
-                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left">${i?.name}</div>
-                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
+                                return `<div class="py-3.5 text-sm flex justify-between items-center group text-left text-left">
+                                    <div class="text-left text-left text-left">
+                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left text-left">${i?.name}</div>
+                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     </div>
-                                    <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-3 py-1.5 rounded-full text-left">${dispBorrower}</span>
+                                    <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-3 py-1.5 rounded-full text-left text-left">${dispBorrower}</span>
                                 </div>`
-                            }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase">No active records found.</div>'}
+                            }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase text-left">No active records found.</div>'}
                         </div>
                     </div>`;
             } else if (window.currentView === 'inventory') {
@@ -656,9 +687,9 @@
                 
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
                 
-                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase text-left">Item Info</th><th class="px-6 py-4 tracking-widest uppercase text-left">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left"><td class="text-center text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300"></i></td><td class="px-6 py-4"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5 text-left">${m.cat}</div></td><td class="px-6 py-4 text-left"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'}">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6 text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md">Bulk Assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-3 px-6">
-                        <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
-                        <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-6 py-4 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left text-left text-left"><td class="text-center text-left text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300 text-left"></i></td><td class="px-6 py-4 text-left"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5 text-left text-left">${m.cat}</div></td><td class="px-6 py-4 text-left text-left"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6 text-right text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left text-left text-left"><td colspan="4" class="p-3 px-6 text-left text-left">
+                        <div class="relative max-w-sm mb-3 text-left text-left text-left"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300 text-left text-left"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
+                        <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
                     </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
                 
                 list.forEach(m => { if (window.expandedInventoryModels.has(m.name)) window.renderUnitSublist(m.name, window.searchQuery || ''); });
@@ -673,10 +704,10 @@
                     });
                 }
                 const grouped = fLoans.reduce((acc, l) => { const name = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name; if(!acc[l.employeeId]) acc[l.employeeId] = { eName: name, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
-                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left"><tr><th class="w-12 text-left"></th><th class="px-6 py-4 tracking-widest uppercase text-left">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left"><td class="text-center text-left"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter text-left">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6 text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em] text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6 text-right"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic">No active assignments found.</td></tr>'}</tbody></table></div>`;
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left text-left text-left"><table class="w-full text-left text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left text-left text-left"><tr><th class="w-12 text-left text-left"></th><th class="px-6 py-4 tracking-widest uppercase text-left text-left text-left text-left">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase text-right text-right">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left text-left text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left text-left text-left"><td class="text-center text-left text-left text-left"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200 text-left text-left"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter text-left text-left text-left text-left">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6 text-right text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left text-left text-left"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black text-left text-left text-left text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em] text-left text-left text-left text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6 text-right text-right text-right"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg text-right text-right">MARK RETURNED</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic text-left text-left">No active assignments found.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group text-left"><div class="absolute top-4 right-4 flex gap-2 text-left"><button onclick="openEmployeeModal('${e.id}')" class="p-1.5 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-1.5 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic text-left">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1 text-left">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10 text-left">${heldCount} Assets Held</div></div><button onclick="openEmployeeHistory('${e.id}')" class="w-full py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl text-left"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i> History Log</button></div>`}).join('')}</div>`;
+                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left text-left text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group text-left text-left text-left"><div class="absolute top-4 right-4 flex gap-2 text-left text-left text-left"><button onclick="openEmployeeModal('${e.id}')" class="p-1.5 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm text-left text-left"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-1.5 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm text-left text-left text-left"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left text-left text-left"></i></button></div><div class="text-left text-left text-left text-left"><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic text-left text-left">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic text-left text-left text-left text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1 text-left text-left text-left text-left">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10 text-left text-left text-left text-left">${heldCount} Assets Held</div></div><button onclick="openEmployeeHistory('${e.id}')" class="w-full py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl text-left text-left text-left"><i data-lucide="history" class="w-3.5 h-3.5 text-left text-left text-left"></i> History Log</button></div>`}).join('')}</div>`;
             }
             if (window.lucide) lucide.createIcons();
         };
@@ -697,17 +728,21 @@
             container.innerHTML = filtered.map(u => {
                 const loan = currentActives.find(c => c.itemId === u.id);
                 const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
-                return `<tr class="border-b last:border-0 border-slate-50 text-left"><td class="px-6 py-3.5 text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left">${u.lnNumber || 'NO ID'}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5 text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right">
-                    <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="openItemModal('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="initiateDelete('item', '${u.id}')" class="p-1.5 text-slate-200 hover:text-[#CC0000] transition-colors" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-xl shadow-lg">Return</button>`}
+                return `<tr class="border-b last:border-0 border-slate-50 text-left text-left text-left text-left text-left text-left text-left text-left"><td class="px-6 py-3.5 text-left text-left text-left text-left text-left text-left text-left text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left text-left text-left text-left">${u.lnNumber || 'NO ID'}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5 text-left text-left text-left text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left text-left text-left text-left text-left text-left text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right text-right text-right text-right">
+                    <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left text-left text-left" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5 text-left text-left text-left"></i></button>
+                    <button onclick="openItemModal('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left text-left text-left" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left text-left text-left"></i></button>
+                    <button onclick="initiateDelete('item', '${u.id}')" class="p-1.5 text-slate-200 hover:text-[#CC0000] transition-colors text-left text-left text-left" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left text-left text-left"></i></button>
+                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg text-left text-left text-left">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-xl shadow-lg text-left text-left text-left">Return</button>`}
                 </td></tr>`;
-            }).join('') || '<tr><td colspan="3" class="p-6 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
+            }).join('') || '<tr><td colspan="3" class="p-6 text-center italic text-slate-300 font-black text-[9px] uppercase text-left text-left text-left">No matching units.</td></tr>';
             if (window.lucide) lucide.createIcons();
         };
 
-        window.toggleMobileAddMenu = () => document.getElementById('mobile-add-menu')?.classList.toggle('hidden');
+        window.toggleMobileAddMenu = () => {
+            const menu = document.getElementById('mobile-add-menu');
+            if (menu) menu.classList.toggle('hidden');
+        };
+
         window.addEventListener('click', (e) => { const d = document.getElementById('add-dropdown'); if(d && !e.target.closest('#add-new-btn')) d.classList.add('hidden'); });
         init();
     </script>
