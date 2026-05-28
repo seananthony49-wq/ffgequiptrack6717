@@ -144,6 +144,7 @@
         <div id="content-area" class="space-y-8 text-left"></div>
     </main>
 
+    <!-- Mobile Nav Bar -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-black flex justify-around items-center z-40 pb-safe shadow-2xl">
         <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
             <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1 text-left"></i>
@@ -178,13 +179,14 @@
                     <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Item</span>
                 </button>
                 <button onclick="openEmployeeModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform">
-                    <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl"><i data-lucide="user-plus" class="w-8 h-8 text-left text-left text-left"></i></div>
+                    <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl"><i data-lucide="user-plus" class="w-8 h-8 text-left text-left text-left font-black"></i></div>
                     <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Staff</span>
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Item Entry Modal -->
     <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left text-left">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-[#CC0000]">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white text-left">
@@ -229,6 +231,7 @@
         </div>
     </div>
 
+    <!-- Bulk Assignment Modal -->
     <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
             <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center text-left">
@@ -259,6 +262,7 @@
         </div>
     </div>
 
+    <!-- Return Process Modal -->
     <div id="return-modal" class="fixed inset-0 modal-backdrop z-[120] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-black">
             <div class="p-8 border-b border-slate-50 bg-white">
@@ -354,7 +358,7 @@
           appId: "1:1086542719557:web:49d7318c74e59e5050d12c"
         };
 
-        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic">${v}</p></div></div>`;
+        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic text-left">${v}</p></div></div>`;
 
         window.currentView = 'dashboard';
         window.searchQuery = '';
@@ -474,7 +478,7 @@
                         if (window.isLocalMode) window[col].push({id, ...entry}); else await setDoc(doc(db, col, id.toString()), entry);
                     }
                 };
-                await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'condition',excel:'Condition'},{local:'status',excel:'Status'}]);
+                await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'status',excel:'Status'}]);
                 await importSheet("Employees", "employees", [{local:'name',excel:'Name'},{local:'department',excel:'Dept'}]);
                 alert("Restored Successfully!"); window.render();
             };
@@ -486,7 +490,7 @@
             window.expandedEmployees.clear(); window.expandedInventoryModels.clear();
             const si = document.getElementById('search-input'); if(si) si.value = '';
             const cf = document.getElementById('cat-filter'); if(cf) cf.value = 'All';
-            window.render(); 
+            window.currentView = v; window.render(); 
         };
 
         window.handleSearch = (v) => { window.searchQuery = v.toLowerCase(); window.render(); };
@@ -604,7 +608,7 @@
             container.innerHTML = filtered.map(e => {
                 const qty = window.bulkSelectionMap.get(e.id) || 0;
                 return `<div class="flex items-center justify-between p-4 rounded-2xl border bg-white ${qty > 0 ? 'border-[#3c78e6] bg-blue-50/30' : 'border-slate-100'}">
-                    <div class="flex items-center gap-3 text-left"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black">${e.department}</div></div></div>
+                    <div class="flex items-center gap-3 text-left"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight text-left">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black text-left">${e.department}</div></div></div>
                     <div class="flex items-center gap-2"><button onclick="changeBulkQty('${e.id}', -1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="minus" class="w-4 h-4"></i></button><span class="w-6 text-center font-black text-sm text-[#3c78e6]">${qty}</span><button onclick="changeBulkQty('${e.id}', 1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="plus" class="w-4 h-4"></i></button></div>
                 </div>`;
             }).join('');
@@ -736,31 +740,42 @@
             window.closeModal('unit-modal');
         };
 
+        window.initiateDelete = (type, id) => { window.deleteTarget = { type, id }; document.getElementById('delete-modal').classList.remove('hidden'); if (window.lucide) lucide.createIcons(); };
+        window.confirmDelete = async () => {
+            if (!window.deleteTarget) return;
+            const { type, id } = window.deleteTarget;
+            const col = type === 'employee' ? 'employees' : 'inventory';
+            if (window.isLocalMode) { window[col] = window[col].filter(x => x.id !== id); persistLocal(); }
+            else await deleteDoc(doc(db, col, id));
+            window.deleteTarget = null;
+            window.closeModal('delete-modal');
+        };
+
         window.openUnitHistory = (unitId) => {
             const unit = window.inventory.find(i => i.id === unitId);
-            document.getElementById('history-modal-title').innerText = `Unit History: ${unit.name}`;
+            document.getElementById('history-modal-title').innerText = `LOGS: ${unit.name}`;
             document.getElementById('history-th-1').innerText = "BORROWER";
             const unitLoans = window.checkouts.filter(c => c.itemId === unitId).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
             document.getElementById('history-table-body').innerHTML = unitLoans.length ? unitLoans.map(h => {
                 const displayName = h.empName || window.employees.find(e => e.id === h.employeeId)?.name || 'Former Staff';
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div>${notesInfo}</div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest">No previous assignment logs found.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest text-left">No previous assignment logs found.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
         window.openEmployeeHistory = (id) => {
             const emp = window.employees.find(e => e.id === id);
-            document.getElementById('history-modal-title').innerText = `STAFF LOG: ${emp.name}`;
+            document.getElementById('history-modal-title').innerText = `ROSTER LOG: ${emp.name}`;
             document.getElementById('history-th-1').innerText = "ITEM DETAILS";
             const history = window.checkouts.filter(c => c.employeeId === id).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
             document.getElementById('history-table-body').innerHTML = history.length ? history.map(h => {
                 const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Item', lnNumber: 'N/A' };
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'}</div>${notesInfo}</div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase text-right">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6 text-left"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase text-right">${h.status}${condInfo}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
@@ -781,7 +796,7 @@
                     return !window.searchQuery || i?.name.toLowerCase().includes(window.searchQuery) || bName.includes(window.searchQuery) || i?.lnNumber?.toLowerCase().includes(window.searchQuery);
                 });
                 area.innerHTML = `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
                         ${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-slate-100', 'text-black')}
                         ${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
                         ${renderStatCard('In Storage', window.inventory.filter(i=>i.status==='available').length, 'check-circle', 'bg-emerald-50', 'text-emerald-600')}
@@ -789,18 +804,18 @@
                     </div>
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-left">
                         <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3 text-left text-left">Live Overview</h3>
-                        <div class="divide-y divide-slate-50 text-left text-left">
+                        <div class="divide-y divide-slate-50 text-left">
                             ${qLoans.slice(0,12).map(l => {
                                 const i = window.inventory.find(inv=>inv.id===l.itemId);
                                 const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
                                 return `<div class="py-3.5 text-sm flex justify-between items-center group text-left">
-                                    <div class="text-left text-left">
-                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left text-left">${i?.name}</div>
-                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
+                                    <div class="text-left text-left text-left">
+                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left text-left text-left">${i?.name}</div>
+                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     </div>
-                                    <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-3 py-1.5 rounded-full text-left">${dispBorrower}</span>
+                                    <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-full text-left">${dispBorrower}</span>
                                 </div>`
-                            }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase">No active records found.</div>'}
+                            }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase text-left">No active records found.</div>'}
                         </div>
                     </div>`;
             } else if (window.currentView === 'inventory') {
@@ -824,8 +839,8 @@
                 
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
                 
-                area.innerHTML = `<div class="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-10 py-6 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-10 py-6 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-10 py-6 text-right pr-10 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left"><td class="text-center text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-6 text-slate-300 text-left text-left"></i></td><td class="px-10 py-7"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mt-1 text-left text-left">${m.cat}</div></td><td class="px-10 py-7 text-left"><span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-10 py-7 text-right pr-10 text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-4 px-10 text-left">
-                        <div class="relative max-w-sm mb-4 text-left"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300 text-left"></i><input type="text" placeholder="Search serial numbers in group..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-6 py-4 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left text-left text-left"><td class="text-center text-left text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300 text-left"></i></td><td class="px-6 py-4 text-left"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5 text-left text-left">${m.cat}</div></td><td class="px-6 py-4 text-left text-left"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6 text-right text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-3 px-6 text-left">
+                        <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
                         <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
                     </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
                 
@@ -841,10 +856,10 @@
                     });
                 }
                 const grouped = fLoans.reduce((acc, l) => { const name = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name; if(!acc[l.employeeId]) acc[l.employeeId] = { eName: name, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
-                area.innerHTML = `<div class="bg-white rounded-[2rem] border shadow-sm overflow-hidden text-left text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left"><tr><th class="w-12 text-left"></th><th class="px-10 py-6 tracking-widest uppercase text-left">Borrower Name</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase text-right">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left"><td class="text-center text-left"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-6 text-slate-200 text-left text-left"></i></td><td class="px-10 py-7 font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${grouped[id].eName || 'User'}</td><td class="px-10 py-7 text-right font-black text-[#CC0000] text-sm italic pr-10 text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left"><td></td><td class="px-10 py-6 border-l-[10px] border-black text-left text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-1 tracking-[0.15em] text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-10 py-6 text-right pr-10 text-right"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[9px] uppercase tracking-widest bg-black px-6 py-2.5 rounded-full shadow-lg text-right">MARK RETURNED</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-20 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic text-left">No active assignments.</td></tr>'}</tbody></table></div>`;
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left"><tr><th class="w-12"></th><th class="px-6 py-4 tracking-widest uppercase text-left">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter text-left">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6 text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em] text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg text-right">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic text-left">No active loan records.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col gap-8 relative group text-left"><div class="absolute top-8 right-8 flex gap-3 text-left"><button onclick="openEmployeeModal('${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-black transition-colors shadow-sm text-left"><i data-lucide="edit-2" class="w-4 h-4 text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm text-left"><i data-lucide="trash-2" class="w-4 h-4 text-left"></i></button></div><div class="text-left text-left"><div class="w-16 h-16 bg-slate-100 text-black rounded-[1.5rem] flex items-center justify-center font-black text-2xl mb-6 shadow-inner italic text-left">${e.name[0]}</div><div class="font-black text-xl text-black leading-tight uppercase tracking-tighter italic text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.2em] mt-2 text-left">${e.department || 'General Staff'}</div><div class="text-[10px] font-black text-white mt-6 bg-[#CC0000] inline-block px-5 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-red-500/20 text-left">${heldCount} Assets Held</div></div><div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-5 bg-black border-none rounded-3xl text-[10px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl text-left"><i data-lucide="history" class="w-4 h-4 text-left"></i> History Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-5 bg-[#3c78e6] border-none rounded-3xl text-[10px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl text-left" title="Download Asset Receipt"><i data-lucide="download" class="w-4 h-4 text-left"></i> Receipt</button> </div></div>`}).join('')}</div>`;
+                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group text-left"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1 text-left">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10 text-left">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i> Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl" title="Download Asset Receipt"><i data-lucide="download" class="w-3.5 h-3.5 text-left"></i> Receipt</button> </div> </div>`}).join('')}`;
             }
             if (window.lucide) lucide.createIcons();
         };
@@ -866,18 +881,19 @@
                 const loan = currentActives.find(c => c.itemId === u.id);
                 const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
                 const condBadge = u.condition ? `<span class="px-2 py-0.5 rounded text-[9px] font-black bg-slate-100 text-slate-600 uppercase tracking-widest ml-2">${u.condition}</span>` : '';
-                return `<tr class="border-b last:border-0 border-slate-50 text-left"><td class="px-6 py-3.5 text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1 text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left"><span class="text-[9px] font-black tracking-[0.2em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right">
-                    <button onclick="openUnitHistory('${u.id}')" class="p-2 text-slate-200 hover:text-black transition-colors" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="openItemModal('${u.id}')" class="p-2 text-slate-200 hover:text-black transition-colors" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="initiateDelete('item', '${u.id}')" class="p-2 text-slate-200 hover:text-[#CC0000] transition-colors" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-4 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-4 text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-xl shadow-lg">Return</button>`}
+                return `<tr class="border-b last:border-0 border-slate-50 text-left"><td class="px-6 py-3.5 text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5 text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right">
+                    <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5"></i></button>
+                    <button onclick="openItemModal('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                    <button onclick="initiateDelete('item', '${u.id}')" class="p-1.5 text-slate-200 hover:text-[#CC0000] transition-colors text-left" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Return</button>`}
                 </td></tr>`;
-            }).join('') || '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
+            }).join('') || '<tr><td colspan="3" class="p-6 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
             if (window.lucide) lucide.createIcons();
         };
 
         window.toggleMobileAddMenu = () => document.getElementById('mobile-add-menu')?.classList.toggle('hidden');
         window.addEventListener('click', (e) => { const d = document.getElementById('add-dropdown'); if(d && !e.target.closest('#add-new-btn')) d.classList.add('hidden'); });
+        
         init();
     </script>
 </body>
