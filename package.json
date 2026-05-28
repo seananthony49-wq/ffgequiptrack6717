@@ -1,0 +1,12 @@
+{
+"name": "equiptrack-backups",
+"version": "1.0.0",
+"description": "Automated monthly backup system for EquipTrack database",
+"main": "scripts/backup.js",
+"dependencies": {
+"dotenv": "^16.4.5",
+"firebase-admin": "^12.0.0",
+"nodemailer": "^6.9.13",
+"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"
+}
+}
