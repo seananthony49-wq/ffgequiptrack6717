@@ -17,8 +17,8 @@ jobs:
           node-version: '20'
       - name: Install Dependencies
         run: |
-          npm cache clean --force
-          npm install
+          rm -f package-lock.json
+          npm install --no-package-lock
       - name: Run Backup Script
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
