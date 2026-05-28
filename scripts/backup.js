@@ -14,10 +14,10 @@ tomorrowDate.setDate(chicagoDate.getDate() + 1);
 // If tomorrow's month is different from today's, then today is the last day of the month.
 const isLastDayOfTheMonth = tomorrowDate.getMonth() !== chicagoDate.getMonth();
 
-//if (!isLastDayOfTheMonth) {
-  //  console.log(`[EquipTrack Backup] Localized date is ${chicagoDate.toDateString()}. Not the last day of the month. Slept.`);
-    //process.exit(0);
-//}
+if (!isLastDayOfTheMonth) {
+    console.log(`[EquipTrack Backup] Localized date is ${chicagoDate.toDateString()}. Not the last day of the month. Slept.`);
+    process.exit(0);
+}
 
 console.log(`[EquipTrack Backup] Last day of the month reached: ${chicagoDate.toDateString()}. Starting backup...`);
 
