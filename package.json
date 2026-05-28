@@ -1,8 +1,6 @@
 {
   "name": "equiptrack-backups",
   "version": "1.0.0",
-  "description": "Automated monthly backup system for EquipTrack database",
-  "main": "scripts/backup.js",
   "dependencies": {
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.0.0",
