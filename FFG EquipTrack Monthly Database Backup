@@ -1,0 +1,36 @@
+name: FFG EquipTrack Monthly Database Backup
+
+on:
+schedule:
+# Runs daily at 23:00 UTC (5:00 PM CST / 6:00 PM CDT).
+# The script inside will double-check if it's the last day of the month.
+- cron: '0 23 * * *'
+workflow_dispatch: # Allows you to manually trigger a backup from GitHub anytime
+
+jobs:
+backup:
+runs-on: ubuntu-latest
+
+steps:
+- name: Checkout Repository
+  uses: actions/checkout@v4
+
+- name: Setup Node.js Environment
+  uses: actions/setup-node@v4
+  with:
+    node-version: '20'
+
+# STREAMING_CHUNK:Installing dependencies and executing backup...
+- name: Install Dependencies
+  run: npm install
+
+- name: Run Backup Script
+  env:
+    # Secure credentials stored in GitHub Repository Secrets
+    FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    SMTP_HOST: ${{ secrets.SMTP_HOST }}
+    SMTP_PORT: ${{ secrets.SMTP_PORT }}
+    SMTP_USER: ${{ secrets.SMTP_USER }}
+    SMTP_PASS: ${{ secrets.SMTP_PASS }}
+    TO_EMAIL: ${{ secrets.TO_EMAIL }}
+  run: node scripts/backup.js
