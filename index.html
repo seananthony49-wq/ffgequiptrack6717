@@ -358,6 +358,9 @@
           appId: "1:1086542719557:web:49d7318c74e59e5050d12c"
         };
 
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const getPublicPath = (colName) => collection(db, 'artifacts', appId, 'public', 'data', colName);
+
         const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic text-left">${v}</p></div></div>`;
 
         window.currentView = 'dashboard';
@@ -397,12 +400,12 @@
                 if(d) d.className = 'w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]';
                 if(md) md.className = 'w-2.5 h-2.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white] border-2 border-white/20';
                 const st = document.getElementById('status-text');
-                if (st) st.innerText = "Synced Online";
+                if (st) st.innerText = "Synced Online (Shared)";
                 window.dismissLoading(); window.render(); 
             };
-            onSnapshot(collection(db, 'inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
-            onSnapshot(collection(db, 'employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
-            onSnapshot(collection(db, 'checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
+            onSnapshot(getPublicPath('inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
+            onSnapshot(getPublicPath('employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
+            onSnapshot(getPublicPath('checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
         };
 
         const persistLocal = () => { if (!window.isLocalMode) return; localStorage.setItem('et_inventory', JSON.stringify(window.inventory)); localStorage.setItem('et_employees', JSON.stringify(window.employees)); localStorage.setItem('et_checkouts', JSON.stringify(window.checkouts)); window.render(); };
@@ -475,7 +478,7 @@
                     for (const row of json) {
                         const entry = {}; fm.forEach(f => entry[f.local] = row[f.excel] || "");
                         const id = row.ID || (Date.now().toString() + Math.random());
-                        if (window.isLocalMode) window[col].push({id, ...entry}); else await setDoc(doc(db, col, id.toString()), entry);
+                        if (window.isLocalMode) window[col].push({id, ...entry}); else await setDoc(doc(getPublicPath(col), id.toString()), entry);
                     }
                 };
                 await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'status',excel:'Status'}]);
@@ -551,17 +554,17 @@
                 const cur = window.inventory.find(i=>i.id===window.editingItemId);
                 const data = { name, category, lnNumber: ln, serial: sn, condition, status: cur.status };
                 if (window.isLocalMode) { const idx = window.inventory.findIndex(i=>i.id===window.editingItemId); window.inventory[idx] = {id: window.editingItemId, ...data}; persistLocal(); }
-                else await setDoc(doc(db, 'inventory', window.editingItemId), data);
+                else await setDoc(doc(getPublicPath('inventory'), window.editingItemId), data);
             } else {
                 for (let i = 0; i < qty; i++) {
                     const id = Date.now().toString() + i;
                     const isAssigned = qty === 1 && assignedId;
                     const data = { name, category, lnNumber: qty > 1 ? "" : ln, serial: qty > 1 ? "" : sn, condition, status: isAssigned ? 'checked-out' : 'available' };
-                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(db, 'inventory', id), data); }
+                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(getPublicPath('inventory'), id), data); }
                     if (isAssigned) {
                         const empName = window.employees.find(e=>e.id===assignedId)?.name;
                         const loan = { itemId: id, employeeId: assignedId, empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
-                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(db, 'checkouts', 'c'+id), loan); }
+                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(getPublicPath('checkouts'), 'c'+id), loan); }
                     }
                 }
                 if (window.isLocalMode) persistLocal();
@@ -588,7 +591,7 @@
                 const idx = window.employees.findIndex(e => e.id === id);
                 if (idx > -1) window.employees[idx] = { id, ...data }; else window.employees.push({ id, ...data });
                 persistLocal();
-            } else await setDoc(doc(db, 'employees', id), data, { merge: true });
+            } else await setDoc(doc(getPublicPath('employees'), id), data, { merge: true });
             window.editingEmployeeId = null;
             window.closeModal('employee-modal');
         };
@@ -660,7 +663,7 @@
                     if (!unit) break;
                     const loan = { itemId: unit.id, employeeId: empId, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
                     if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now()+uIdx, ...loan}); window.inventory.find(inv=>inv.id===unit.id).status = 'checked-out'; }
-                    else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()+uIdx), loan); await updateDoc(doc(db, 'inventory', unit.id), { status: 'checked-out' }); }
+                    else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()+uIdx), loan); await updateDoc(doc(getPublicPath('inventory'), unit.id), { status: 'checked-out' }); }
                 }
             }
             if (window.isLocalMode) persistLocal();
@@ -682,7 +685,7 @@
             const empName = window.employees.find(e=>e.id===eid)?.name;
             const loan = { itemId: window.selectedItemId, employeeId: eid, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
             if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now(), ...loan}); window.inventory.find(i=>i.id===window.selectedItemId).status = 'checked-out'; persistLocal(); }
-            else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()), loan); await updateDoc(doc(db, 'inventory', window.selectedItemId), { status: 'checked-out' }); }
+            else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()), loan); await updateDoc(doc(getPublicPath('inventory'), window.selectedItemId), { status: 'checked-out' }); }
             window.closeModal('checkout-modal');
         };
 
@@ -725,13 +728,13 @@
                 }
                 persistLocal();
             } else {
-                await updateDoc(doc(db, 'checkouts', lid), {
+                await updateDoc(doc(getPublicPath('checkouts'), lid), {
                     status: 'returned',
                     returnDate: returnDate,
                     returnCondition: cond,
                     returnNotes: notes
                 });
-                await updateDoc(doc(db, 'inventory', loan.itemId), {
+                await updateDoc(doc(getPublicPath('inventory'), loan.itemId), {
                     status: 'available',
                     condition: cond
                 });
@@ -744,9 +747,13 @@
         window.confirmDelete = async () => {
             if (!window.deleteTarget) return;
             const { type, id } = window.deleteTarget;
-            const col = type === 'employee' ? 'employees' : 'inventory';
-            if (window.isLocalMode) { window[col] = window[col].filter(x => x.id !== id); persistLocal(); }
-            else await deleteDoc(doc(db, col, id));
+            const colName = type === 'employee' ? 'employees' : 'inventory';
+            if (window.isLocalMode) { 
+                window[colName] = window[colName].filter(x => x.id !== id); 
+                persistLocal(); 
+            } else {
+                await deleteDoc(doc(getPublicPath(colName), id));
+            }
             window.deleteTarget = null;
             window.closeModal('delete-modal');
         };
@@ -840,9 +847,9 @@
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
                 
                 area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-6 py-4 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left text-left text-left"><td class="text-center text-left text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300 text-left"></i></td><td class="px-6 py-4 text-left"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5 text-left text-left">${m.cat}</div></td><td class="px-6 py-4 text-left text-left"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6 text-right text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-3 px-6 text-left">
-                        <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
-                        <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
-                    </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
+                    <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
+                    <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
+                </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
                 
                 list.forEach(m => { if (window.expandedInventoryModels.has(m.name)) window.renderUnitSublist(m.name, window.searchQuery || ''); });
             } else if (window.currentView === 'checkouts') {
