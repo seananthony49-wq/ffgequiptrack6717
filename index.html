@@ -93,7 +93,6 @@
         </div>
     </aside>
 
-    <!-- Header (Mobile) -->
     <header class="md:hidden bg-[#CC0000] px-5 py-5 sticky top-0 z-40 flex items-center justify-between shadow-xl">
         <div class="flex items-center gap-2 cursor-pointer" onclick="setView('dashboard')">
             <h1 class="font-black text-2xl text-white italic tracking-tighter uppercase text-left">EquipTrack</h1>
@@ -144,7 +143,6 @@
         <div id="content-area" class="space-y-8 text-left"></div>
     </main>
 
-    <!-- Mobile Nav Bar -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-black flex justify-around items-center z-40 pb-safe shadow-2xl">
         <button onclick="setView('dashboard')" data-m-view="dashboard" class="mobile-nav-btn flex flex-col items-center py-5 px-4 text-white/40 transition-colors">
             <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1 text-left"></i>
@@ -164,7 +162,6 @@
         </button>
     </nav>
 
-    <!-- Floating Add Button (Mobile Only) -->
     <button onclick="toggleMobileAddMenu()" class="md:hidden fixed bottom-28 right-6 w-16 h-16 bg-[#3c78e6] text-white rounded-full shadow-2xl flex items-center justify-center z-50">
         <i data-lucide="plus" class="w-8 h-8 text-left"></i>
     </button>
@@ -186,7 +183,6 @@
         </div>
     </div>
 
-    <!-- Item Entry Modal -->
     <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-[#CC0000]">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white text-left">
@@ -231,7 +227,6 @@
         </div>
     </div>
 
-    <!-- Bulk Assignment Modal -->
     <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
             <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center text-left">
@@ -262,7 +257,6 @@
         </div>
     </div>
 
-    <!-- Return Process Modal -->
     <div id="return-modal" class="fixed inset-0 modal-backdrop z-[120] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-black">
             <div class="p-8 border-b border-slate-50 bg-white">
@@ -292,7 +286,6 @@
         </div>
     </div>
 
-    <!-- History Modal -->
     <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[12px] border-t-black">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
@@ -387,7 +380,6 @@
         };
 
         const init = async () => {
-            // Safety timeout: If Firebase takes over 4 seconds, show local mode bypass button automatically
             const safetyTimer = setTimeout(() => {
                 const bypass = document.getElementById('bypass-btn');
                 const lt = document.getElementById('loading-text');
@@ -438,14 +430,14 @@
                 const activeLoan = window.checkouts.find(c => c.itemId === i.id && c.status === 'active');
                 const borrower = activeLoan ? (window.employees.find(e => e.id === activeLoan.employeeId)?.name || activeLoan.empName || 'Unknown Staff') : 'In Storage';
                 return {
-                    Model: i.name,
-                    Category: i.category,
-                    LaptopID: i.lnNumber,
-                    SerialNumber: i.serial,
-                    Condition: i.condition || 'Good',
-                    Status: i.status === 'checked-out' ? 'On Loan' : 'Available',
-                    CurrentBorrower: borrower,
-                    SystemID: i.id
+                    "Model": i.name,
+                    "Category": i.category,
+                    "LaptopID": i.lnNumber,
+                    "SerialNumber": i.serial,
+                    "Condition": i.condition || 'Good',
+                    "Status": i.status === 'checked-out' ? 'On Loan' : 'Available',
+                    "CurrentBorrower": borrower,
+                    "SystemID": i.id
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inventoryData), "Inventory");
@@ -455,16 +447,16 @@
                 const empName = window.employees.find(e => e.id === c.employeeId)?.name || c.empName || 'Former Staff';
                 const item = window.inventory.find(i => i.id === c.itemId);
                 return {
-                    Borrower: empName,
-                    ItemModel: item?.name || 'Deleted Item',
-                    LaptopID: item?.lnNumber || 'N/A',
-                    SerialNumber: item?.serial || 'N/A',
-                    CheckoutDate: c.checkoutDate,
-                    Status: c.status,
-                    ReturnDate: c.returnDate || 'N/A',
-                    ReturnCondition: c.returnCondition || 'N/A',
-                    ReturnNotes: c.returnNotes || 'N/A',
-                    SystemID: c.id
+                    "Borrower": empName,
+                    "ItemModel": item?.name || 'Deleted Item',
+                    "LaptopID": item?.lnNumber || 'N/A',
+                    "SerialNumber": item?.serial || 'N/A',
+                    "CheckoutDate": c.checkoutDate,
+                    "Status": c.status,
+                    "ReturnDate": c.returnDate || 'N/A',
+                    "ReturnCondition": c.returnCondition || 'N/A',
+                    "ReturnNotes": c.returnNotes || 'N/A',
+                    "SystemID": c.id
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checkoutsData), "Checkout_History");
@@ -505,54 +497,141 @@
                         await Promise.all(batchDeletes);
                     };
 
-                    const importSheet = async (sheetName, colName, fieldMap) => {
-                        const ws = workbook.Sheets[sheetName]; 
-                        if (!ws) return;
-                        const json = XLSX.utils.sheet_to_json(ws);
-                        
-                        if (!window.isLocalMode) {
-                            await clearCollection(colName);
-                        } else {
-                            window[colName] = [];
-                        }
+                    // 1. Restore Employees First so IDs/Names align
+                    const empWs = workbook.Sheets["Employees"];
+                    const employeesMap = new Map(); // Name -> Generated or Existing ID
+                    if (empWs) {
+                        const empJson = XLSX.utils.sheet_to_json(empWs);
+                        if (!window.isLocalMode) await clearCollection('employees');
+                        window.employees = [];
 
-                        for (const row of json) {
-                            const entry = {}; 
-                            fieldMap.forEach(f => entry[f.local] = row[f.excel] || "");
-                            const id = row.SystemID || row.ID || (Date.now().toString() + Math.random());
-                            
+                        for (const row of empJson) {
+                            const id = row.ID?.toString() || ('e' + Date.now() + Math.random());
+                            const empEntry = {
+                                id: id,
+                                name: row.Name || 'Unknown Staff',
+                                department: row.Department || 'General'
+                            };
+                            employeesMap.set(empEntry.name.toLowerCase().trim(), id);
                             if (window.isLocalMode) {
-                                window[colName].push({ id: id.toString(), ...entry });
+                                window.employees.push(empEntry);
                             } else {
-                                await setDoc(doc(getPublicPath(colName), id.toString()), entry);
+                                await setDoc(doc(getPublicPath('employees'), id), { name: empEntry.name, department: empEntry.department });
                             }
                         }
-                    };
+                    }
 
-                    await importSheet("Inventory", "inventory", [
-                        { local: 'name', excel: 'Model' },
-                        { local: 'category', excel: 'Category' },
-                        { local: 'lnNumber', excel: 'LaptopID' },
-                        { local: 'serial', excel: 'SerialNumber' },
-                        { local: 'condition', excel: 'Condition' },
-                        { local: 'status', excel: 'Status' }
-                    ]);
+                    // 2. Restore Inventory Items
+                    const invWs = workbook.Sheets["Inventory"];
+                    const inventoryMap = new Map(); // SystemID or Model+Serial -> Item ID
+                    if (invWs) {
+                        const invJson = XLSX.utils.sheet_to_json(invWs);
+                        if (!window.isLocalMode) await clearCollection('inventory');
+                        window.inventory = [];
 
-                    await importSheet("Employees", "employees", [
-                        { local: 'name', excel: 'Name' },
-                        { local: 'department', excel: 'Department' }
-                    ]);
+                        for (const row of invJson) {
+                            const id = row.SystemID?.toString() || (Date.now().toString() + Math.random());
+                            const itemEntry = {
+                                id: id,
+                                name: row.Model || 'Unnamed Asset',
+                                category: row.Category || 'Other',
+                                lnNumber: row.LaptopID || '',
+                                serial: row.SerialNumber || '',
+                                condition: row.Condition || 'Good',
+                                status: (row.Status === 'On Loan' || row.Status === 'checked-out') ? 'checked-out' : 'available'
+                            };
+                            inventoryMap.set(id, id);
+                            if (row.Model) inventoryMap.set(row.Model.toLowerCase().trim() + '_' + (row.SerialNumber || ''), id);
 
-                    await importSheet("Checkout_History", "checkouts", [
-                        { local: 'checkoutDate', excel: 'CheckoutDate' },
-                        { local: 'status', excel: 'Status' },
-                        { local: 'returnDate', excel: 'ReturnDate' },
-                        { local: 'returnCondition', excel: 'ReturnCondition' },
-                        { local: 'returnNotes', excel: 'ReturnNotes' }
-                    ]);
+                            if (window.isLocalMode) {
+                                window.inventory.push(itemEntry);
+                            } else {
+                                await setDoc(doc(getPublicPath('inventory'), id), {
+                                    name: itemEntry.name,
+                                    category: itemEntry.category,
+                                    lnNumber: itemEntry.lnNumber,
+                                    serial: itemEntry.serial,
+                                    condition: itemEntry.condition,
+                                    status: itemEntry.status
+                                });
+                            }
+                        }
+                    }
+
+                    // 3. Restore Checkout & History Logs
+                    const histWs = workbook.Sheets["Checkout_History"] || workbook.Sheets["Checkout History"];
+                    if (histWs) {
+                        const histJson = XLSX.utils.sheet_to_json(histWs);
+                        if (!window.isLocalMode) await clearCollection('checkouts');
+                        window.checkouts = [];
+
+                        for (const row of histJson) {
+                            const loanId = row.SystemID?.toString() || ('c' + Date.now() + Math.random());
+                            
+                            // Resolve Employee ID from borrower name if needed
+                            const borrowerName = (row.Borrower || '').trim();
+                            let employeeId = '';
+                            for (const [eName, eId] of employeesMap.entries()) {
+                                if (eName === borrowerName.toLowerCase()) {
+                                    employeeId = eId;
+                                    break;
+                                }
+                            }
+                            if (!employeeId && borrowerName) {
+                                // Create new employee on the fly if not found in Employees sheet
+                                employeeId = 'e' + Date.now() + Math.random();
+                                const newEmp = { id: employeeId, name: borrowerName, department: 'General' };
+                                employeesMap.set(borrowerName.toLowerCase(), employeeId);
+                                window.employees.push(newEmp);
+                                if (!window.isLocalMode) {
+                                    await setDoc(doc(getPublicPath('employees'), employeeId), { name: newEmp.name, department: newEmp.department });
+                                }
+                            }
+
+                            // Resolve Item ID
+                            let itemId = '';
+                            const itemModel = (row.ItemModel || '').trim();
+                            const serial = (row.SerialNumber || '').trim();
+                            if (itemModel && serial) {
+                                itemId = inventoryMap.get(itemModel.toLowerCase() + '_' + serial) || '';
+                            }
+                            if (!itemId && itemModel) {
+                                // Find any matching unit of this model
+                                const found = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase());
+                                if (found) itemId = found.id;
+                            }
+                            if (!itemId) {
+                                // Create dummy placeholder item if missing
+                                itemId = 'i' + Date.now() + Math.random();
+                                const newItem = { id: itemId, name: itemModel || 'Restored Asset', category: 'Other', lnNumber: row.LaptopID || '', serial: serial, condition: row.ReturnCondition || 'Good', status: row.Status === 'active' ? 'checked-out' : 'available' };
+                                window.inventory.push(newItem);
+                                if (!window.isLocalMode) {
+                                    await setDoc(doc(getPublicPath('inventory'), itemId), newItem);
+                                }
+                            }
+
+                            const loanEntry = {
+                                id: loanId,
+                                itemId: itemId,
+                                employeeId: employeeId || 'unknown',
+                                empName: borrowerName,
+                                checkoutDate: row.CheckoutDate || new Date().toISOString().split('T')[0],
+                                status: (row.Status === 'active' || row.Status === 'On Loan') ? 'active' : 'returned',
+                                returnDate: (row.ReturnDate && row.ReturnDate !== 'N/A') ? row.ReturnDate : '',
+                                returnCondition: (row.ReturnCondition && row.ReturnCondition !== 'N/A') ? row.ReturnCondition : '',
+                                returnNotes: (row.ReturnNotes && row.ReturnNotes !== 'N/A') ? row.ReturnNotes : ''
+                            };
+
+                            if (window.isLocalMode) {
+                                window.checkouts.push(loanEntry);
+                            } else {
+                                await setDoc(doc(getPublicPath('checkouts'), loanId), loanEntry);
+                            }
+                        }
+                    }
 
                     if (window.isLocalMode) persistLocal();
-                    alert("System Backup Restored Successfully!");
+                    alert("Complete System Backup Restored Successfully Across All Screens!");
                     window.render();
                 } catch (err) {
                     console.error("Restore failed:", err);
