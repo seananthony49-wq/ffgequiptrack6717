@@ -16,18 +16,18 @@
             --espn-grey: #f2f2f2;
         }
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-
+        
         .active-nav { background-color: white; color: var(--espn-red) !important; font-weight: 800; border-radius: 0 50px 50px 0; margin-right: -1rem; }
         .active-nav .lucide { color: var(--espn-red); }
         .active-nav-mobile { color: var(--espn-red); border-bottom: 4px solid var(--espn-red); padding-bottom: 8px; }
-
+        
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
         #loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .hidden-overlay { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s; }
-
+        
         .sortable { cursor: pointer; transition: background 0.2s; }
         .sortable:hover { background-color: #f8fafc; }
-
+        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -44,7 +44,7 @@
     <div id="loading-overlay">
         <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
         <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
-        <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Asset Database...</p>
+        <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Public Asset Database...</p>
         <button id="bypass-btn" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full hidden">Local Bypass</button>
     </div>
 
@@ -58,7 +58,7 @@
             </div>
             <div class="h-1 w-12 bg-white/30 mt-2 rounded-full"></div>
         </div>
-
+        
         <nav class="space-y-1 flex-1 pl-4">
             <button onclick="setView('dashboard')" data-view="dashboard" class="nav-btn w-full flex items-center gap-3 px-6 py-4 text-white/80 transition-all hover:text-white font-bold text-sm uppercase tracking-wide text-left">
                 <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
@@ -109,7 +109,7 @@
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
                         <input type="text" id="search-input" placeholder="Search items, serial numbers, staff..." class="w-full pl-12 pr-6 py-4 bg-white border-none rounded-2xl text-sm font-medium shadow-sm focus:ring-4 focus:ring-black/5 outline-none" oninput="handleSearch(this.value)" />
                     </div>
-
+                    
                     <div class="hidden md:block relative">
                         <button id="add-new-btn" onclick="toggleAddDropdown(event)" class="bg-[#3c78e6] hover:bg-[#2a5bbd] text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest flex items-center gap-3 transition-all shadow-xl shadow-blue-500/20 text-left">
                             <i data-lucide="plus" class="w-4 h-4 text-left"></i> Add New
@@ -179,7 +179,6 @@
                     <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Item</span>
                 </button>
                 <button onclick="openEmployeeModal(); toggleMobileAddMenu();" class="flex flex-col items-center gap-4 p-8 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-sm active:scale-95 transition-transform">
-                    <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl"><i data-lucide="user-plus" class="w-8 h-8 text-left text-left text-left"></i></div>
                     <div class="w-16 h-16 bg-black text-white rounded-[1.5rem] flex items-center justify-center shadow-xl"><i data-lucide="user-plus" class="w-8 h-8 text-left text-left text-left font-black"></i></div>
                     <span class="text-xs font-black text-black uppercase tracking-widest text-left">Add Staff</span>
                 </button>
@@ -220,7 +219,7 @@
                         </select>
                     </div>
                 </div>
-
+                
                 <div id="assign-field-container">
                     <label class="block text-[9px] font-black text-[#3c78e6] uppercase tracking-widest mb-1.5 ml-1 text-left">Initial Assignment (Optional)</label>
                     <select id="item-assign-to" class="w-full p-3 bg-blue-50 border-none rounded-xl text-sm font-bold outline-none text-[#3c78e6]"></select>
@@ -348,7 +347,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyDS_XhPU9WT1XdJj5JCHwwGrKu9goJx01g",
@@ -359,7 +358,9 @@
           appId: "1:1086542719557:web:49d7318c74e59e5050d12c"
         };
 
-        const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic">${v}</p></div></div>`;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const getPublicPath = (colName) => collection(db, 'artifacts', appId, 'public', 'data', colName);
+
         const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic text-left">${v}</p></div></div>`;
 
         window.currentView = 'dashboard';
@@ -374,7 +375,7 @@
         let db, auth;
 
         window.dismissLoading = () => document.getElementById('loading-overlay')?.classList.add('hidden-overlay');
-
+        
         window.switchToLocalMode = () => {
             window.isLocalMode = true;
             const dot = document.getElementById('status-dot');
@@ -399,19 +400,19 @@
                 if(d) d.className = 'w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_8px_white]';
                 if(md) md.className = 'w-2.5 h-2.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_white] border-2 border-white/20';
                 const st = document.getElementById('status-text');
-                if (st) st.innerText = "Synced Online";
+                if (st) st.innerText = "Synced Online (Shared)";
                 window.dismissLoading(); window.render(); 
             };
-            onSnapshot(collection(db, 'inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
-            onSnapshot(collection(db, 'employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
-            onSnapshot(collection(db, 'checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); });
+            onSnapshot(getPublicPath('inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
+            onSnapshot(getPublicPath('employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
+            onSnapshot(getPublicPath('checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
         };
 
         const persistLocal = () => { if (!window.isLocalMode) return; localStorage.setItem('et_inventory', JSON.stringify(window.inventory)); localStorage.setItem('et_employees', JSON.stringify(window.employees)); localStorage.setItem('et_checkouts', JSON.stringify(window.checkouts)); window.render(); };
 
         window.exportSystemData = () => {
             const wb = XLSX.utils.book_new();
-
+            
             const inventoryData = window.inventory.map(i => {
                 const activeLoan = window.checkouts.find(c => c.itemId === i.id && c.status === 'active');
                 const borrower = activeLoan ? (window.employees.find(e => e.id === activeLoan.employeeId)?.name || activeLoan.empName || 'Unknown Staff') : 'In Storage';
@@ -428,7 +429,7 @@
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inventoryData), "Inventory");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.employees.map(e => ({ID: e.id, Name: e.name, Department: e.department}))), "Employees");
-
+            
             const checkoutsData = window.checkouts.map(c => {
                 const empName = window.employees.find(e => e.id === c.employeeId)?.name || c.empName || 'Former Staff';
                 const item = window.inventory.find(i => i.id === c.itemId);
@@ -441,7 +442,8 @@
                     Status: c.status,
                     ReturnDate: c.returnDate || 'N/A',
                     ReturnCondition: c.returnCondition || 'N/A',
-                    ReturnNotes: c.returnNotes || 'N/A'
+                    ReturnNotes: c.returnNotes || 'N/A',
+                    SystemID: c.id
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checkoutsData), "Checkout_History");
@@ -468,22 +470,74 @@
         };
 
         window.triggerSystemRestore = () => document.getElementById('system-restore-input').click();
+        
         window.processSystemRestore = (input) => {
-            const reader = new FileReader(); reader.onload = async (e) => {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-                const importSheet = async (sn, col, fm) => {
-                    const ws = workbook.Sheets[sn]; if (!ws) return [];
-                    const json = XLSX.utils.sheet_to_json(ws);
-                    for (const row of json) {
-                        const entry = {}; fm.forEach(f => entry[f.local] = row[f.excel] || "");
-                        const id = row.ID || (Date.now().toString() + Math.random());
-                        if (window.isLocalMode) window[col].push({id, ...entry}); else await setDoc(doc(db, col, id.toString()), entry);
-                    }
-                };
-                await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'condition',excel:'Condition'},{local:'status',excel:'Status'}]);
-                await importSheet("Inventory", "inventory", [{local:'name',excel:'Model'},{local:'category',excel:'Category'},{local:'lnNumber',excel:'LN'},{local:'serial',excel:'SN'},{local:'status',excel:'Status'}]);
-                await importSheet("Employees", "employees", [{local:'name',excel:'Name'},{local:'department',excel:'Dept'}]);
-                alert("Restored Successfully!"); window.render();
+            const reader = new FileReader(); 
+            reader.onload = async (e) => {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    
+                    const clearCollection = async (colPath) => {
+                        if (window.isLocalMode) return;
+                        const snap = await getDocs(getPublicPath(colPath));
+                        const batchDeletes = snap.docs.map(d => deleteDoc(doc(getPublicPath(colPath), d.id)));
+                        await Promise.all(batchDeletes);
+                    };
+
+                    const importSheet = async (sheetName, colName, fieldMap) => {
+                        const ws = workbook.Sheets[sheetName]; 
+                        if (!ws) return;
+                        const json = XLSX.utils.sheet_to_json(ws);
+                        
+                        if (!window.isLocalMode) {
+                            await clearCollection(colName);
+                        } else {
+                            window[colName] = [];
+                        }
+
+                        for (const row of json) {
+                            const entry = {}; 
+                            fieldMap.forEach(f => entry[f.local] = row[f.excel] || "");
+                            const id = row.SystemID || row.ID || (Date.now().toString() + Math.random());
+                            
+                            if (window.isLocalMode) {
+                                window[colName].push({ id: id.toString(), ...entry });
+                            } else {
+                                await setDoc(doc(getPublicPath(colName), id.toString()), entry);
+                            }
+                        }
+                    };
+
+                    await importSheet("Inventory", "inventory", [
+                        { local: 'name', excel: 'Model' },
+                        { local: 'category', excel: 'Category' },
+                        { local: 'lnNumber', excel: 'LaptopID' },
+                        { local: 'serial', excel: 'SerialNumber' },
+                        { local: 'condition', excel: 'Condition' },
+                        { local: 'status', excel: 'Status' }
+                    ]);
+
+                    await importSheet("Employees", "employees", [
+                        { local: 'name', excel: 'Name' },
+                        { local: 'department', excel: 'Department' }
+                    ]);
+
+                    await importSheet("Checkout_History", "checkouts", [
+                        { local: 'checkoutDate', excel: 'CheckoutDate' },
+                        { local: 'status', excel: 'Status' },
+                        { local: 'returnDate', excel: 'ReturnDate' },
+                        { local: 'returnCondition', excel: 'ReturnCondition' },
+                        { local: 'returnNotes', excel: 'ReturnNotes' }
+                    ]);
+
+                    if (window.isLocalMode) persistLocal();
+                    alert("System Backup Restored Successfully!");
+                    window.render();
+                } catch (err) {
+                    console.error("Restore failed:", err);
+                    alert("Failed to restore backup. Please verify your Excel file format.");
+                }
+                input.value = '';
             };
             reader.readAsArrayBuffer(input.files[0]);
         };
@@ -493,7 +547,6 @@
             window.expandedEmployees.clear(); window.expandedInventoryModels.clear();
             const si = document.getElementById('search-input'); if(si) si.value = '';
             const cf = document.getElementById('cat-filter'); if(cf) cf.value = 'All';
-            window.render(); 
             window.currentView = v; window.render(); 
         };
 
@@ -528,13 +581,13 @@
             document.getElementById('item-ln').value = item ? item.lnNumber : '';
             document.getElementById('item-serial').value = item ? item.serial : '';
             document.getElementById('item-condition').value = item ? (item.condition || 'Good') : 'Good';
-
+            
             const assignSel = document.getElementById('item-assign-to');
             assignSel.innerHTML = '<option value="">(None - Available)</option>' + 
                 window.employees.sort((a,b)=>a.name.localeCompare(b.name))
                 .map(e => `<option value="${e.id}">${e.name}</option>`).join('');
             assignSel.value = "";
-
+            
             window.handleBulkInputToggle(1);
             const models = [...new Set(window.inventory.map(i => i.name))].sort();
             const suggestions = document.getElementById('model-suggestions');
@@ -555,17 +608,17 @@
                 const cur = window.inventory.find(i=>i.id===window.editingItemId);
                 const data = { name, category, lnNumber: ln, serial: sn, condition, status: cur.status };
                 if (window.isLocalMode) { const idx = window.inventory.findIndex(i=>i.id===window.editingItemId); window.inventory[idx] = {id: window.editingItemId, ...data}; persistLocal(); }
-                else await setDoc(doc(db, 'inventory', window.editingItemId), data);
+                else await setDoc(doc(getPublicPath('inventory'), window.editingItemId), data);
             } else {
                 for (let i = 0; i < qty; i++) {
                     const id = Date.now().toString() + i;
                     const isAssigned = qty === 1 && assignedId;
                     const data = { name, category, lnNumber: qty > 1 ? "" : ln, serial: qty > 1 ? "" : sn, condition, status: isAssigned ? 'checked-out' : 'available' };
-                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(db, 'inventory', id), data); }
+                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(getPublicPath('inventory'), id), data); }
                     if (isAssigned) {
                         const empName = window.employees.find(e=>e.id===assignedId)?.name;
                         const loan = { itemId: id, employeeId: assignedId, empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
-                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(db, 'checkouts', 'c'+id), loan); }
+                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(getPublicPath('checkouts'), 'c'+id), loan); }
                     }
                 }
                 if (window.isLocalMode) persistLocal();
@@ -592,7 +645,7 @@
                 const idx = window.employees.findIndex(e => e.id === id);
                 if (idx > -1) window.employees[idx] = { id, ...data }; else window.employees.push({ id, ...data });
                 persistLocal();
-            } else await setDoc(doc(db, 'employees', id), data, { merge: true });
+            } else await setDoc(doc(getPublicPath('employees'), id), data, { merge: true });
             window.editingEmployeeId = null;
             window.closeModal('employee-modal');
         };
@@ -612,7 +665,6 @@
             container.innerHTML = filtered.map(e => {
                 const qty = window.bulkSelectionMap.get(e.id) || 0;
                 return `<div class="flex items-center justify-between p-4 rounded-2xl border bg-white ${qty > 0 ? 'border-[#3c78e6] bg-blue-50/30' : 'border-slate-100'}">
-                    <div class="flex items-center gap-3 text-left"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black">${e.department}</div></div></div>
                     <div class="flex items-center gap-3 text-left"><input type="checkbox" onchange="toggleBulkStaff('${e.id}')" ${qty > 0 ? 'checked' : ''} class="w-5 h-5 rounded accent-[#3c78e6]"><div><div class="font-black text-black text-xs uppercase tracking-tight text-left">${e.name}</div><div class="text-[9px] text-slate-400 uppercase font-black text-left">${e.department}</div></div></div>
                     <div class="flex items-center gap-2"><button onclick="changeBulkQty('${e.id}', -1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="minus" class="w-4 h-4"></i></button><span class="w-6 text-center font-black text-sm text-[#3c78e6]">${qty}</span><button onclick="changeBulkQty('${e.id}', 1)" class="w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 shadow-sm"><i data-lucide="plus" class="w-4 h-4"></i></button></div>
                 </div>`;
@@ -665,7 +717,7 @@
                     if (!unit) break;
                     const loan = { itemId: unit.id, employeeId: empId, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
                     if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now()+uIdx, ...loan}); window.inventory.find(inv=>inv.id===unit.id).status = 'checked-out'; }
-                    else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()+uIdx), loan); await updateDoc(doc(db, 'inventory', unit.id), { status: 'checked-out' }); }
+                    else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()+uIdx), loan); await updateDoc(doc(getPublicPath('inventory'), unit.id), { status: 'checked-out' }); }
                 }
             }
             if (window.isLocalMode) persistLocal();
@@ -687,7 +739,7 @@
             const empName = window.employees.find(e=>e.id===eid)?.name;
             const loan = { itemId: window.selectedItemId, employeeId: eid, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
             if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now(), ...loan}); window.inventory.find(i=>i.id===window.selectedItemId).status = 'checked-out'; persistLocal(); }
-            else { await setDoc(doc(db, 'checkouts', 'c'+Date.now()), loan); await updateDoc(doc(db, 'inventory', window.selectedItemId), { status: 'checked-out' }); }
+            else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()), loan); await updateDoc(doc(getPublicPath('inventory'), window.selectedItemId), { status: 'checked-out' }); }
             window.closeModal('checkout-modal');
         };
 
@@ -697,12 +749,12 @@
             if (!loan) return;
             const item = window.inventory.find(i => i.id === loan.itemId);
             const borrowerName = loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'Staff Member';
-
+            
             const infoEl = document.getElementById('return-modal-item-info');
             if (infoEl && item) {
                 infoEl.innerText = `${item.name} (SN: ${item.serial || 'N/A'}) - Returned by ${borrowerName}`;
             }
-
+            
             document.getElementById('return-condition').value = 'Good';
             document.getElementById('return-notes').value = '';
             document.getElementById('return-modal').classList.remove('hidden');
@@ -712,17 +764,17 @@
             const lid = window.activeReturnLoanId;
             const loan = window.checkouts.find(c => c.id === lid);
             if (!loan) return;
-
+            
             const cond = document.getElementById('return-condition').value;
             const notes = document.getElementById('return-notes').value;
             const returnDate = new Date().toISOString().split('T')[0];
-
+            
             if (window.isLocalMode) {
                 loan.status = 'returned';
                 loan.returnDate = returnDate;
                 loan.returnCondition = cond;
                 loan.returnNotes = notes;
-
+                
                 const item = window.inventory.find(i => i.id === loan.itemId);
                 if (item) {
                     item.status = 'available';
@@ -730,13 +782,13 @@
                 }
                 persistLocal();
             } else {
-                await updateDoc(doc(db, 'checkouts', lid), {
+                await updateDoc(doc(getPublicPath('checkouts'), lid), {
                     status: 'returned',
                     returnDate: returnDate,
                     returnCondition: cond,
                     returnNotes: notes
                 });
-                await updateDoc(doc(db, 'inventory', loan.itemId), {
+                await updateDoc(doc(getPublicPath('inventory'), loan.itemId), {
                     status: 'available',
                     condition: cond
                 });
@@ -749,16 +801,19 @@
         window.confirmDelete = async () => {
             if (!window.deleteTarget) return;
             const { type, id } = window.deleteTarget;
-            const col = type === 'employee' ? 'employees' : 'inventory';
-            if (window.isLocalMode) { window[col] = window[col].filter(x => x.id !== id); persistLocal(); }
-            else await deleteDoc(doc(db, col, id));
+            const colName = type === 'employee' ? 'employees' : 'inventory';
+            if (window.isLocalMode) { 
+                window[colName] = window[colName].filter(x => x.id !== id); 
+                persistLocal(); 
+            } else {
+                await deleteDoc(doc(getPublicPath(colName), id));
+            }
             window.deleteTarget = null;
             window.closeModal('delete-modal');
         };
 
         window.openUnitHistory = (unitId) => {
             const unit = window.inventory.find(i => i.id === unitId);
-            document.getElementById('history-modal-title').innerText = `Unit History: ${unit.name}`;
             document.getElementById('history-modal-title').innerText = `LOGS: ${unit.name}`;
             document.getElementById('history-th-1').innerText = "BORROWER";
             const unitLoans = window.checkouts.filter(c => c.itemId === unitId).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
@@ -766,8 +821,6 @@
                 const displayName = h.empName || window.employees.find(e => e.id === h.employeeId)?.name || 'Former Staff';
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div>${notesInfo}</div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest">No previous assignment logs found.</td></tr>';
                 return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
             }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest text-left">No previous assignment logs found.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
@@ -775,7 +828,6 @@
 
         window.openEmployeeHistory = (id) => {
             const emp = window.employees.find(e => e.id === id);
-            document.getElementById('history-modal-title').innerText = `STAFF LOG: ${emp.name}`;
             document.getElementById('history-modal-title').innerText = `ROSTER LOG: ${emp.name}`;
             document.getElementById('history-th-1').innerText = "ITEM DETAILS";
             const history = window.checkouts.filter(c => c.employeeId === id).sort((a,b) => new Date(b.checkoutDate) - new Date(a.checkoutDate));
@@ -783,8 +835,6 @@
                 const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Item', lnNumber: 'N/A' };
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-6 py-3"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'}</div>${notesInfo}</div></td><td class="px-6 py-3 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-6 py-3 text-right pr-6 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase text-right">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-10 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
                 return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6 text-left"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase text-right">${h.status}${condInfo}</td></tr>`;
             }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
@@ -798,7 +848,7 @@
             document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active-nav-mobile', b.dataset.mView === window.currentView));
             const area = document.getElementById('content-area');
             const actives = window.checkouts.filter(c => c.status === 'active');
-
+            
             if (window.currentView === 'dashboard') {
                 const qLoans = actives.filter(l => {
                     const i = window.inventory.find(inv=>inv.id===l.itemId);
@@ -807,7 +857,6 @@
                     return !window.searchQuery || i?.name.toLowerCase().includes(window.searchQuery) || bName.includes(window.searchQuery) || i?.lnNumber?.toLowerCase().includes(window.searchQuery);
                 });
                 area.innerHTML = `
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
                         ${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-slate-100', 'text-black')}
                         ${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
@@ -816,23 +865,17 @@
                     </div>
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-left">
                         <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3 text-left text-left">Live Overview</h3>
-                        <div class="divide-y divide-slate-50 text-left text-left">
                         <div class="divide-y divide-slate-50 text-left">
                             ${qLoans.slice(0,12).map(l => {
                                 const i = window.inventory.find(inv=>inv.id===l.itemId);
                                 const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
                                 return `<div class="py-3.5 text-sm flex justify-between items-center group text-left">
-                                    <div class="text-left text-left">
-                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left text-left">${i?.name}</div>
-                                        <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     <div class="text-left text-left text-left">
                                         <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors text-left text-left text-left">${i?.name}</div>
                                         <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5 text-left text-left">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     </div>
-                                    <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-3 py-1.5 rounded-full text-left">${dispBorrower}</span>
                                     <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-full text-left">${dispBorrower}</span>
                                 </div>`
-                            }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase">No active records found.</div>'}
                             }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase text-left">No active records found.</div>'}
                         </div>
                     </div>`;
@@ -840,7 +883,7 @@
                 let groups = window.inventory.reduce((acc, i) => { if (!acc[i.name]) acc[i.name] = { name: i.name, count: 0, available: 0, cat: i.category, units: [] }; acc[i.name].count++; if (i.status === 'available') acc[i.name].available++; acc[i.name].units.push(i); return acc; }, {});
                 let list = Object.values(groups);
                 if (window.filters.cat !== 'All') list = list.filter(m => m.cat === window.filters.cat);
-
+                
                 if (window.searchQuery) {
                     list = list.filter(m => {
                         const nameMatch = m.name.toLowerCase().includes(window.searchQuery);
@@ -854,16 +897,14 @@
                         return nameMatch || unitMatch;
                     });
                 }
-
+                
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
-
-                area.innerHTML = `<div class="bg-white rounded-[2.5rem] border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-10 py-6 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-10 py-6 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-10 py-6 text-right pr-10 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left"><td class="text-center text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-6 text-slate-300 text-left text-left"></i></td><td class="px-10 py-7"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mt-1 text-left text-left">${m.cat}</div></td><td class="px-10 py-7 text-left"><span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-10 py-7 text-right pr-10 text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-4 px-10 text-left">
-                        <div class="relative max-w-sm mb-4 text-left"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300 text-left"></i><input type="text" placeholder="Search serial numbers in group..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
+                
                 area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b text-left"><tr><th class="w-12 text-left"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase text-left text-left">Item Info</th><th class="px-6 py-4 tracking-widest uppercase text-left text-left">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase text-right">Management</th></tr></thead><tbody class="divide-y divide-slate-50 text-left text-left">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors text-left text-left text-left"><td class="text-center text-left text-left"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300 text-left"></i></td><td class="px-6 py-4 text-left"><div class="font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5 text-left text-left">${m.cat}</div></td><td class="px-6 py-4 text-left text-left"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'} text-left text-left">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6 text-right text-right">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md text-right text-right">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30 text-left"><td colspan="4" class="p-3 px-6 text-left">
-                        <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
-                        <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
-                    </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
-
+                    <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5 text-left text-left" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
+                    <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden text-left"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
+                </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
+                
                 list.forEach(m => { if (window.expandedInventoryModels.has(m.name)) window.renderUnitSublist(m.name, window.searchQuery || ''); });
             } else if (window.currentView === 'checkouts') {
                 let fLoans = actives.map(l => { const i = window.inventory.find(inv=>inv.id===l.itemId); return {...l, iName: i?.name, iCat: i?.category, iLn: i?.lnNumber, iSn: i?.serial}; });
@@ -876,11 +917,9 @@
                     });
                 }
                 const grouped = fLoans.reduce((acc, l) => { const name = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name; if(!acc[l.employeeId]) acc[l.employeeId] = { eName: name, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
-                area.innerHTML = `<div class="bg-white rounded-[2rem] border shadow-sm overflow-hidden text-left text-left"><table class="w-full text-left text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left"><tr><th class="w-12 text-left"></th><th class="px-10 py-6 tracking-widest uppercase text-left">Borrower Name</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase text-right">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left"><td class="text-center text-left"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-6 text-slate-200 text-left text-left"></i></td><td class="px-10 py-7 font-black text-black text-sm uppercase italic tracking-tighter text-left text-left">${grouped[id].eName || 'User'}</td><td class="px-10 py-7 text-right font-black text-[#CC0000] text-sm italic pr-10 text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left"><td></td><td class="px-10 py-6 border-l-[10px] border-black text-left text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-1 tracking-[0.15em] text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-10 py-6 text-right pr-10 text-right"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[9px] uppercase tracking-widest bg-black px-6 py-2.5 rounded-full shadow-lg text-right">MARK RETURNED</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-20 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic text-left">No active assignments.</td></tr>'}</tbody></table></div>`;
                 area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b text-left"><tr><th class="w-12"></th><th class="px-6 py-4 tracking-widest uppercase text-left">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50 text-left">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50 text-left"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter text-left">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6 text-right">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40 text-left"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black text-left"><div class="text-xs font-black text-slate-700 uppercase tracking-widest text-left">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em] text-left">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg text-right">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic text-left">No active loan records.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col gap-8 relative group text-left"><div class="absolute top-8 right-8 flex gap-3 text-left"><button onclick="openEmployeeModal('${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-black transition-colors shadow-sm text-left"><i data-lucide="edit-2" class="w-4 h-4 text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2.5 bg-slate-50 rounded-xl text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm text-left"><i data-lucide="trash-2" class="w-4 h-4 text-left"></i></button></div><div class="text-left text-left"><div class="w-16 h-16 bg-slate-100 text-black rounded-[1.5rem] flex items-center justify-center font-black text-2xl mb-6 shadow-inner italic text-left">${e.name[0]}</div><div class="font-black text-xl text-black leading-tight uppercase tracking-tighter italic text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.2em] mt-2 text-left">${e.department || 'General Staff'}</div><div class="text-[10px] font-black text-white mt-6 bg-[#CC0000] inline-block px-5 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-red-500/20 text-left">${heldCount} Assets Held</div></div><div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-5 bg-black border-none rounded-3xl text-[10px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl text-left"><i data-lucide="history" class="w-4 h-4 text-left"></i> History Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-5 bg-[#3c78e6] border-none rounded-3xl text-[10px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl text-left" title="Download Asset Receipt"><i data-lucide="download" class="w-4 h-4 text-left"></i> Receipt</button> </div></div>`}).join('')}</div>`;
                 area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group text-left"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic text-left">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1 text-left">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10 text-left">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i> Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl" title="Download Asset Receipt"><i data-lucide="download" class="w-3.5 h-3.5 text-left"></i> Receipt</button> </div> </div>`}).join('')}`;
             }
             if (window.lucide) lucide.createIcons();
@@ -903,18 +942,12 @@
                 const loan = currentActives.find(c => c.itemId === u.id);
                 const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
                 const condBadge = u.condition ? `<span class="px-2 py-0.5 rounded text-[9px] font-black bg-slate-100 text-slate-600 uppercase tracking-widest ml-2">${u.condition}</span>` : '';
-                return `<tr class="border-b last:border-0 border-slate-50 text-left"><td class="px-6 py-3.5 text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1 text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left"><span class="text-[9px] font-black tracking-[0.2em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right">
-                    <button onclick="openUnitHistory('${u.id}')" class="p-2 text-slate-200 hover:text-black transition-colors" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="openItemModal('${u.id}')" class="p-2 text-slate-200 hover:text-black transition-colors" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    <button onclick="initiateDelete('item', '${u.id}')" class="p-2 text-slate-200 hover:text-[#CC0000] transition-colors" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-left"></i></button>
-                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-4 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-4 text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-xl shadow-lg">Return</button>`}
                 return `<tr class="border-b last:border-0 border-slate-50 text-left"><td class="px-6 py-3.5 text-left"><div class="text-sm font-black text-slate-800 uppercase tracking-tight text-left">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5 text-left">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5 text-left"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic text-left">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3 text-right">
                     <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5"></i></button>
                     <button onclick="openItemModal('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors text-left" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
                     <button onclick="initiateDelete('item', '${u.id}')" class="p-1.5 text-slate-200 hover:text-[#CC0000] transition-colors text-left" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Return</button>`}
                 </td></tr>`;
-            }).join('') || '<tr><td colspan="3" class="p-10 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
             }).join('') || '<tr><td colspan="3" class="p-6 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
             if (window.lucide) lucide.createIcons();
         };
@@ -925,3 +958,4 @@
         init();
     </script>
 </body>
+</html>
