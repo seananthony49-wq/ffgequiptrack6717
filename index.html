@@ -44,8 +44,8 @@
     <div id="loading-overlay">
         <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
         <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
-        <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Public Asset Database...</p>
-        <button id="bypass-btn" onclick="switchToLocalMode()" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg">Local / Standalone Mode</button>
+        <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Asset Database...</p>
+        <button id="bypass-btn" onclick="switchToLocalMode()" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg hidden">Local / Standalone Mode</button>
     </div>
 
     <input type="file" id="system-restore-input" class="hidden" accept=".xlsx" onchange="processSystemRestore(this)">
@@ -497,9 +497,9 @@
                         await Promise.all(batchDeletes);
                     };
 
-                    // 1. Restore Employees First so IDs/Names align
+                    // 1. Restore Employees First
                     const empWs = workbook.Sheets["Employees"];
-                    const employeesMap = new Map(); // Name -> Generated or Existing ID
+                    const employeesMap = new Map(); // Name (lower) -> Employee ID
                     if (empWs) {
                         const empJson = XLSX.utils.sheet_to_json(empWs);
                         if (!window.isLocalMode) await clearCollection('employees');
@@ -507,16 +507,15 @@
 
                         for (const row of empJson) {
                             const id = row.ID?.toString() || ('e' + Date.now() + Math.random());
-                            const empEntry = {
-                                id: id,
-                                name: row.Name || 'Unknown Staff',
-                                department: row.Department || 'General'
-                            };
-                            employeesMap.set(empEntry.name.toLowerCase().trim(), id);
+                            const name = (row.Name || 'Unknown Staff').trim();
+                            const dept = row.Department || 'General';
+                            const empEntry = { id: id, name: name, department: dept };
+                            
+                            employeesMap.set(name.toLowerCase(), id);
                             if (window.isLocalMode) {
                                 window.employees.push(empEntry);
                             } else {
-                                await setDoc(doc(getPublicPath('employees'), id), { name: empEntry.name, department: empEntry.department });
+                                await setDoc(doc(getPublicPath('employees'), id), { name: name, department: dept });
                             }
                         }
                     }
@@ -531,17 +530,22 @@
 
                         for (const row of invJson) {
                             const id = row.SystemID?.toString() || (Date.now().toString() + Math.random());
+                            const statusStr = row.Status || '';
+                            const isOnLoan = statusStr.toLowerCase() === 'on loan' || statusStr.toLowerCase() === 'checked-out';
                             const itemEntry = {
                                 id: id,
-                                name: row.Model || 'Unnamed Asset',
+                                name: (row.Model || 'Unnamed Asset').trim(),
                                 category: row.Category || 'Other',
-                                lnNumber: row.LaptopID || '',
-                                serial: row.SerialNumber || '',
+                                lnNumber: row.LaptopID ? row.LaptopID.toString().trim() : '',
+                                serial: row.SerialNumber ? row.SerialNumber.toString().trim() : '',
                                 condition: row.Condition || 'Good',
-                                status: (row.Status === 'On Loan' || row.Status === 'checked-out') ? 'checked-out' : 'available'
+                                status: isOnLoan ? 'checked-out' : 'available'
                             };
                             inventoryMap.set(id, id);
-                            if (row.Model) inventoryMap.set(row.Model.toLowerCase().trim() + '_' + (row.SerialNumber || ''), id);
+                            if (itemEntry.name) {
+                                inventoryMap.set(itemEntry.name.toLowerCase() + '_' + itemEntry.serial, id);
+                                inventoryMap.set(itemEntry.name.toLowerCase() + '_' + itemEntry.lnNumber, id);
+                            }
 
                             if (window.isLocalMode) {
                                 window.inventory.push(itemEntry);
@@ -558,27 +562,25 @@
                         }
                     }
 
-                    // 3. Restore Checkout & History Logs
+                    // 3. Restore Checkout & History Logs & Reconstruct Active Loans from Inventory CurrentBorrower or Checkout_History
                     const histWs = workbook.Sheets["Checkout_History"] || workbook.Sheets["Checkout History"];
+                    if (!window.isLocalMode) await clearCollection('checkouts');
+                    window.checkouts = [];
+
+                    const processedLoanIds = new Set();
+
                     if (histWs) {
                         const histJson = XLSX.utils.sheet_to_json(histWs);
-                        if (!window.isLocalMode) await clearCollection('checkouts');
-                        window.checkouts = [];
+                        for (let idx = 0; idx < histJson.length; idx++) {
+                            const row = histJson[idx];
+                            const loanId = row.SystemID?.toString() || ('c' + Date.now() + idx);
+                            if (processedLoanIds.has(loanId)) continue;
+                            processedLoanIds.add(loanId);
 
-                        for (const row of histJson) {
-                            const loanId = row.SystemID?.toString() || ('c' + Date.now() + Math.random());
-                            
-                            // Resolve Employee ID from borrower name if needed
                             const borrowerName = (row.Borrower || '').trim();
-                            let employeeId = '';
-                            for (const [eName, eId] of employeesMap.entries()) {
-                                if (eName === borrowerName.toLowerCase()) {
-                                    employeeId = eId;
-                                    break;
-                                }
-                            }
-                            if (!employeeId && borrowerName) {
-                                // Create new employee on the fly if not found in Employees sheet
+                            let employeeId = employeesMap.get(borrowerName.toLowerCase());
+
+                            if (!employeeId && borrowerName && borrowerName.toLowerCase() !== 'in storage') {
                                 employeeId = 'e' + Date.now() + Math.random();
                                 const newEmp = { id: employeeId, name: borrowerName, department: 'General' };
                                 employeesMap.set(borrowerName.toLowerCase(), employeeId);
@@ -588,35 +590,44 @@
                                 }
                             }
 
-                            // Resolve Item ID
                             let itemId = '';
                             const itemModel = (row.ItemModel || '').trim();
-                            const serial = (row.SerialNumber || '').trim();
-                            if (itemModel && serial) {
-                                itemId = inventoryMap.get(itemModel.toLowerCase() + '_' + serial) || '';
-                            }
-                            if (!itemId && itemModel) {
-                                // Find any matching unit of this model
-                                const found = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase());
+                            const serial = row.SerialNumber ? row.SerialNumber.toString().trim() : '';
+                            const lnNum = row.LaptopID ? row.LaptopID.toString().trim() : '';
+
+                            if (itemModel && serial && serial !== 'N/A' && serial !== 'NaN') {
+                                const found = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase() && i.serial === serial);
                                 if (found) itemId = found.id;
                             }
+                            if (!itemId && itemModel && lnNum && lnNum !== 'N/A' && lnNum !== 'NaN') {
+                                const found = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase() && i.lnNumber === lnNum);
+                                if (found) itemId = found.id;
+                            }
+                            if (!itemId && itemModel) {
+                                const found = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase() && i.status === 'checked-out');
+                                if (found) itemId = found.id;
+                                else {
+                                    const anyFound = window.inventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase());
+                                    if (anyFound) itemId = anyFound.id;
+                                }
+                            }
                             if (!itemId) {
-                                // Create dummy placeholder item if missing
                                 itemId = 'i' + Date.now() + Math.random();
-                                const newItem = { id: itemId, name: itemModel || 'Restored Asset', category: 'Other', lnNumber: row.LaptopID || '', serial: serial, condition: row.ReturnCondition || 'Good', status: row.Status === 'active' ? 'checked-out' : 'available' };
+                                const newItem = { id: itemId, name: itemModel || 'Restored Asset', category: 'Other', lnNumber: lnNum !== 'N/A' ? lnNum : '', serial: serial !== 'N/A' ? serial : '', condition: row.ReturnCondition || 'Good', status: 'active' };
                                 window.inventory.push(newItem);
                                 if (!window.isLocalMode) {
                                     await setDoc(doc(getPublicPath('inventory'), itemId), newItem);
                                 }
                             }
 
+                            const isAct = (row.Status || '').toLowerCase() === 'active' || (row.Status || '').toLowerCase() === 'on loan';
                             const loanEntry = {
                                 id: loanId,
                                 itemId: itemId,
                                 employeeId: employeeId || 'unknown',
                                 empName: borrowerName,
                                 checkoutDate: row.CheckoutDate || new Date().toISOString().split('T')[0],
-                                status: (row.Status === 'active' || row.Status === 'On Loan') ? 'active' : 'returned',
+                                status: isAct ? 'active' : 'returned',
                                 returnDate: (row.ReturnDate && row.ReturnDate !== 'N/A') ? row.ReturnDate : '',
                                 returnCondition: (row.ReturnCondition && row.ReturnCondition !== 'N/A') ? row.ReturnCondition : '',
                                 returnNotes: (row.ReturnNotes && row.ReturnNotes !== 'N/A') ? row.ReturnNotes : ''
@@ -626,6 +637,50 @@
                                 window.checkouts.push(loanEntry);
                             } else {
                                 await setDoc(doc(getPublicPath('checkouts'), loanId), loanEntry);
+                            }
+                        }
+                    }
+
+                    // 4. Fallback: Ensure any inventory item marked as "On Loan" / CurrentBorrower has an active checkout if missing from history
+                    if (invWs) {
+                        const invJson = XLSX.utils.sheet_to_json(invWs);
+                        for (let idx = 0; idx < invJson.length; idx++) {
+                            const row = invJson[idx];
+                            const borrower = (row.CurrentBorrower || '').trim();
+                            const status = (row.Status || '').toLowerCase();
+                            const sysId = row.SystemID?.toString();
+                            if ((status === 'on loan' || status === 'checked-out') && borrower && borrower !== 'In Storage') {
+                                const item = window.inventory.find(i => i.id === sysId || (i.name.toLowerCase() === (row.Model || '').toLowerCase() && i.serial === (row.SerialNumber || '')));
+                                if (item) {
+                                    const existingActive = window.checkouts.find(c => c.itemId === item.id && c.status === 'active');
+                                    if (!existingActive) {
+                                        let empId = employeesMap.get(borrower.toLowerCase());
+                                        if (!empId) {
+                                            empId = 'e' + Date.now() + Math.random();
+                                            employeesMap.set(borrower.toLowerCase(), empId);
+                                            window.employees.push({ id: empId, name: borrower, department: 'General' });
+                                            if (!window.isLocalMode) {
+                                                await setDoc(doc(getPublicPath('employees'), empId), { name: borrower, department: 'General' });
+                                            }
+                                        }
+                                        const loanId = 'c_auto_' + item.id;
+                                        const loanEntry = {
+                                            id: loanId,
+                                            itemId: item.id,
+                                            employeeId: empId,
+                                            empName: borrower,
+                                            checkoutDate: new Date().toISOString().split('T')[0],
+                                            status: 'active'
+                                        };
+                                        window.checkouts.push(loanEntry);
+                                        if (!window.isLocalMode) {
+                                            await setDoc(doc(getPublicPath('checkouts'), loanId), loanEntry);
+                                            await updateDoc(doc(getPublicPath('inventory'), item.id), { status: 'checked-out' });
+                                        } else {
+                                            item.status = 'checked-out';
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
