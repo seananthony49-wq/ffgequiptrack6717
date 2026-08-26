@@ -1392,6 +1392,63 @@
         window.toggleEmployeeGroup = (id) => { if (window.expandedEmployees.has(id)) window.expandedEmployees.delete(id); else window.expandedEmployees.add(id); window.render(); };
         window.toggleInventoryModel = (name) => { if (window.expandedInventoryModels.has(name)) window.expandedInventoryModels.delete(name); else window.expandedInventoryModels.add(name); window.render(); };
 
+        window.renderUnitSublist = (modelName, filterText = '') => {
+            const safeId = modelName.replace(/[^a-zA-Z0-9]/g, '_');
+            const tbody = document.getElementById(`sublist-${safeId}`);
+            if (!tbody) return;
+
+            const units = window.inventory.filter(i => i.name === modelName);
+            const filterLower = (filterText || '').toLowerCase();
+
+            const filteredUnits = units.filter(u => {
+                if (!filterLower) return true;
+                const activeLoan = window.checkouts.find(c => c.itemId === u.id && c.status === 'active');
+                const borrowerName = (activeLoan ? (activeLoan.empName || window.employees.find(e => e.id === activeLoan.employeeId)?.name || '') : (u.currentBorrower || '')).toLowerCase();
+                return (u.lnNumber && u.lnNumber.toLowerCase().includes(filterLower)) ||
+                       (u.serial && u.serial.toLowerCase().includes(filterLower)) ||
+                       (u.condition && u.condition.toLowerCase().includes(filterLower)) ||
+                       borrowerName.includes(filterLower);
+            });
+
+            if (filteredUnits.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-xs text-slate-400 font-bold uppercase">No matching units found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredUnits.map(u => {
+                const activeLoan = window.checkouts.find(c => c.itemId === u.id && c.status === 'active');
+                const isOut = u.status === 'checked-out' || !!activeLoan;
+                const borrowerName = activeLoan ? (activeLoan.empName || window.employees.find(e => e.id === activeLoan.employeeId)?.name || 'Staff Member') : (u.currentBorrower || null);
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100 text-xs text-left">
+                        <td class="py-3 px-4 font-black text-black">
+                            <span class="bg-yellow-300 text-black px-2 py-0.5 rounded text-[10px] font-black mr-2">${u.lnNumber || 'NO ID'}</span>
+                            <span class="text-slate-400 text-[10px] font-bold">SN: ${u.serial || 'N/A'}</span>
+                            <span class="ml-2 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded ${u.condition==='Needs Repair' || u.condition==='Broken'?'bg-red-100 text-red-700':'bg-slate-100 text-slate-600'}">${u.condition || 'Good'}</span>
+                        </td>
+                        <td class="py-3 px-4 font-black italic">
+                            ${isOut ? `<span class="text-[#CC0000] uppercase">With ${borrowerName || 'Staff Member'}</span>` : `<span class="text-emerald-600 uppercase">In Storage</span>`}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="event.stopPropagation(); openUnitHistory('${u.id}')" title="View History Log" class="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-black transition-colors"><i data-lucide="history" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="event.stopPropagation(); openItemModal('${u.id}')" title="Edit Unit" class="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-black transition-colors"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="event.stopPropagation(); initiateDelete('inventory', '${u.id}')" title="Delete Unit" class="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-red-600 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                ${isOut ? `
+                                    <button onclick="event.stopPropagation(); handleReturn('${activeLoan ? activeLoan.id : u.id}')" class="px-4 py-1.5 bg-[#3c78e6] text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md hover:bg-blue-700 transition-colors">Return</button>
+                                ` : `
+                                    <button onclick="event.stopPropagation(); openCheckoutModal('${u.id}')" class="px-4 py-1.5 bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-md hover:bg-[#CC0000] transition-colors">Assign</button>
+                                `}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (window.lucide) lucide.createIcons();
+        };
+
         window.render = () => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active-nav', b.dataset.view === window.currentView));
             document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active-nav-mobile', b.dataset.mView === window.currentView));
