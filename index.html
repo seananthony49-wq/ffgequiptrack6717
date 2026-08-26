@@ -45,7 +45,7 @@
         <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
         <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
         <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Asset Database...</p>
-        <button id="bypass-btn" onclick="switchToLocalMode()" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full shadow-lg hidden">Local / Standalone Mode</button>
+        <button id="bypass-btn" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full hidden">Local Bypass</button>
     </div>
 
     <input type="file" id="system-restore-input" class="hidden" accept=".xlsx" onchange="processSystemRestore(this)">
@@ -73,7 +73,7 @@
                 <i data-lucide="users" class="w-4 h-4"></i> Employees
             </button>
         </nav>
-
+        
         <div class="p-6 mt-auto">
             <div class="bg-black/20 rounded-2xl p-4 border border-white/10 text-left">
                 <p class="text-[9px] font-black text-white/40 uppercase tracking-widest mb-3 italic text-left">Administration</p>
@@ -83,6 +83,9 @@
                     </button>
                     <button onclick="triggerSystemRestore()" class="flex items-center justify-start gap-2 text-[10px] font-black text-white hover:text-white/70 uppercase w-full text-left">
                         <i data-lucide="upload" class="w-3 h-3 text-left"></i> Restore Backup
+                    </button>
+                    <button onclick="openInventoryAuditModal()" class="flex items-center justify-start gap-2 text-[10px] font-black text-amber-300 hover:text-amber-200 uppercase w-full text-left mt-1">
+                        <i data-lucide="alert-triangle" class="w-3 h-3 text-left"></i> Audit Discrepancy
                     </button>
                 </div>
             </div>
@@ -183,29 +186,30 @@
         </div>
     </div>
 
-    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
+    <!-- Modals -->
+    <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-[#CC0000]">
-            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white text-left">
-                <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase text-left">Item Entry</h3>
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
+                <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase">Item Entry</h3>
                 <button onclick="closeModal('item-modal')" class="p-3 bg-slate-50 rounded-full hover:rotate-90 transition-transform"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
             </div>
-            <div class="p-10 space-y-6 text-left">
-                <div class="grid grid-cols-3 gap-6 text-left">
-                    <div class="col-span-2 text-left">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 text-left">Model Name</label>
+            <div class="p-10 space-y-6">
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Model Name</label>
                         <input type="text" id="item-name" list="model-suggestions" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold focus:ring-4 focus:ring-red-500/10 outline-none" />
                         <datalist id="model-suggestions"></datalist>
                     </div>
-                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-left">Qty</label><input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
+                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Qty</label><input type="number" id="item-qty" min="1" value="1" oninput="handleBulkInputToggle(this.value)" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
                 </div>
-                <div class="grid grid-cols-2 gap-6 text-left">
-                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 text-left">Category</label><select id="item-category" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none"><option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option></select></div>
-                    <div><label id="ln-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest text-left">Laptop ID</label><input type="text" id="item-ln" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Category</label><select id="item-category" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none"><option value="Laptop">Laptop</option><option value="Docking Station">Docking Station</option><option value="Headset">Headset</option><option value="Monitor">Monitor</option><option value="Other">Other</option></select></div>
+                    <div><label id="ln-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Laptop ID</label><input type="text" id="item-ln" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
                 </div>
-                <div class="grid grid-cols-2 gap-6 text-left">
-                    <div><label id="sn-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest text-left">Serial Number</label><input type="text" id="item-serial" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div><label id="sn-label" class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Serial Number</label><input type="text" id="item-serial" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none" /></div>
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest text-left">Condition</label>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">Condition</label>
                         <select id="item-condition" class="w-full p-5 bg-slate-100 border-none rounded-2xl text-sm font-bold outline-none text-slate-900">
                             <option value="Excellent">Excellent</option>
                             <option value="Good" selected>Good</option>
@@ -217,22 +221,23 @@
                 </div>
                 
                 <div id="assign-field-container">
-                    <label class="block text-[9px] font-black text-[#3c78e6] uppercase tracking-widest mb-1.5 ml-1 text-left">Initial Assignment (Optional)</label>
+                    <label class="block text-[9px] font-black text-[#3c78e6] uppercase tracking-widest mb-1.5 ml-1">Initial Assignment (Optional)</label>
                     <select id="item-assign-to" class="w-full p-3 bg-blue-50 border-none rounded-xl text-sm font-bold outline-none text-[#3c78e6]"></select>
                 </div>
 
                 <p id="bulk-warning" class="hidden text-[10px] text-[#CC0000] font-black bg-red-50 p-4 rounded-2xl leading-relaxed uppercase border border-red-100 italic">Bulk mode active: Unique identifiers and Initial Assignment disabled.</p>
             </div>
-            <div class="p-10 bg-slate-50 flex gap-6 text-left"><button onclick="closeModal('item-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="saveItem()" class="flex-1 py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest">Confirm Save</button></div>
+            <div class="p-10 bg-slate-50 flex gap-6"><button onclick="closeModal('item-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="saveItem()" class="flex-1 py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest">Confirm Save</button></div>
         </div>
     </div>
 
-    <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4 text-left">
+    <!-- Bulk Assignment Modal -->
+    <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
-            <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center text-left">
+            <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
                 <div>
-                    <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase text-left">Bulk Assignment</h3>
-                    <p id="bulk-checkout-subtitle" class="text-xs text-[#3c78e6] font-black mt-2 uppercase tracking-widest text-left"></p>
+                    <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase">Bulk Assignment</h3>
+                    <p id="bulk-checkout-subtitle" class="text-xs text-[#3c78e6] font-black mt-2 uppercase tracking-widest"></p>
                 </div>
                 <button onclick="toggleBulkSelectAll()" id="bulk-select-all-btn" class="px-8 py-4 bg-slate-100 text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">Select All Staff</button>
             </div>
@@ -246,18 +251,19 @@
             <div id="bulk-stock-warning" class="hidden px-10 py-4 bg-red-600 text-white text-[10px] font-black text-center uppercase tracking-[0.2em] italic">Stock Alert: Allocation exceeds available units</div>
             <div class="p-10 bg-white border-t flex items-center justify-between">
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 text-left">Total Allocated</p>
-                    <p class="text-3xl font-black text-black tracking-tighter text-left"><span id="bulk-total-requested">0</span> <span class="text-slate-200">/</span> <span id="bulk-max-stock" class="text-[#3c78e6]">0</span></p>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Allocated</p>
+                    <p class="text-3xl font-black text-black tracking-tighter"><span id="bulk-total-requested">0</span> <span class="text-slate-200">/</span> <span id="bulk-max-stock" class="text-[#3c78e6]">0</span></p>
                 </div>
                 <div class="flex gap-4">
                     <button onclick="closeModal('bulk-checkout-modal')" class="px-8 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button>
-                    <button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-12 py-5 bg-[#3c78e6] text-white rounded-3xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-blue-500/30 transition-all disabled:opacity-20">Confirm</button>
+                    <button id="bulk-execute-btn" onclick="confirmBulkCheckout()" class="px-12 py-5 bg-[#3c78e6] text-white rounded-3xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-blue-500/35 transition-all disabled:opacity-20">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="return-modal" class="fixed inset-0 modal-backdrop z-[120] hidden flex items-center justify-center p-4 text-left">
+    <!-- Return Process Modal -->
+    <div id="return-modal" class="fixed inset-0 modal-backdrop z-[120] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-black">
             <div class="p-8 border-b border-slate-50 bg-white">
                 <h3 class="text-3xl font-black italic text-black uppercase">Process Return</h3>
@@ -286,7 +292,8 @@
         </div>
     </div>
 
-    <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4 text-left">
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[12px] border-t-black">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
                 <h3 id="history-modal-title" class="text-3xl font-black italic text-black tracking-tighter uppercase">History Logs</h3>
@@ -295,10 +302,53 @@
             <div class="overflow-y-auto flex-1 p-0">
                 <table class="w-full text-left">
                     <thead class="bg-slate-100 text-[11px] uppercase font-black text-slate-500 sticky top-0 z-10 border-b">
-                        <tr><th id="history-th-1" class="px-10 py-6 tracking-widest uppercase text-left">Member / Item</th><th class="px-10 py-6 tracking-widest uppercase">Timeline</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase">Status</th></tr>
+                        <tr><th id="history-th-1" class="px-10 py-6 tracking-widest uppercase">Member / Item</th><th class="px-10 py-6 tracking-widest uppercase">Timeline</th><th class="px-10 py-6 text-right pr-10 tracking-widest uppercase">Status</th></tr>
                     </thead>
                     <tbody id="history-table-body" class="divide-y divide-slate-100"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Audit Modal -->
+    <div id="audit-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-amber-500">
+            <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
+                <div>
+                    <h3 class="text-3xl font-black text-black italic tracking-tighter uppercase">Discrepancy Audit</h3>
+                    <p class="text-xs text-amber-600 font-black mt-2 uppercase tracking-widest">Reconcile active loan count vs total physical inventory capacity</p>
+                </div>
+                <button onclick="closeModal('audit-modal')" class="p-3 bg-slate-50 rounded-full hover:rotate-90 transition-transform"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            <div class="overflow-y-auto flex-1 p-10 space-y-6">
+                <div id="audit-summary-box" class="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col gap-2">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-amber-600"></i>
+                        <h4 class="font-black text-amber-900 uppercase text-sm tracking-wide">Capacity Analysis</h4>
+                    </div>
+                    <p id="audit-status-message" class="text-xs font-bold text-amber-800 leading-relaxed"></p>
+                </div>
+
+                <div>
+                    <h5 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Orphaned or Ghost Active Loans</h5>
+                    <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 max-h-60 overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 sticky top-0">
+                                <tr>
+                                    <th class="px-6 py-3">Borrower</th>
+                                    <th class="px-6 py-3">Loan ID / Item Reference</th>
+                                    <th class="px-6 py-3 text-right pr-6">Quick Force Return</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-orphaned-loans-body" class="divide-y divide-slate-100 text-xs font-bold">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="p-8 bg-slate-50 border-t flex justify-between items-center">
+                <button onclick="autoReconcileDiscrepancies()" class="px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-amber-500/20 transition-all">Auto-Fix Ghost Loans</button>
+                <button onclick="closeModal('audit-modal')" class="px-8 py-4 bg-black text-white rounded-2xl text-xs font-black uppercase tracking-widest">Close Audit</button>
             </div>
         </div>
     </div>
@@ -339,8 +389,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, deleteDoc, collection, onSnapshot, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyDS_XhPU9WT1XdJj5JCHwwGrKu9goJx01g",
@@ -352,7 +402,6 @@
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const getPublicPath = (colName) => collection(db, 'artifacts', appId, 'public', 'data', colName);
 
         const renderStatCard = (l, v, i, bg, c) => `<div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 flex items-center gap-4 shadow-sm text-left"><div class="${bg} ${c} p-3.5 rounded-2xl shadow-sm"><i data-lucide="${i}" class="w-6 h-6"></i></div><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">${l}</p><p class="text-2xl font-black text-black leading-none tracking-tighter italic text-left">${v}</p></div></div>`;
 
@@ -380,29 +429,15 @@
         };
 
         const init = async () => {
-            const safetyTimer = setTimeout(() => {
-                const bypass = document.getElementById('bypass-btn');
-                const lt = document.getElementById('loading-text');
-                if (bypass) bypass.classList.remove('hidden');
-                if (lt) lt.innerText = "Connection taking longer than expected. You can launch Standalone Mode.";
-            }, 4000);
-
             try {
-                const app = initializeApp(firebaseConfig); 
-                auth = getAuth(app); 
-                db = getFirestore(app);
-                
-                await signInAnonymously(auth); 
-                onAuthStateChanged(auth, user => { 
-                    if (user) {
-                        clearTimeout(safetyTimer);
-                        setupListeners(); 
-                    }
-                });
-            } catch (e) {
-                clearTimeout(safetyTimer);
-                window.switchToLocalMode(); 
-            }
+                const app = initializeApp(firebaseConfig); auth = getAuth(app); db = getFirestore(app);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                onAuthStateChanged(auth, user => { if (user) setupListeners(); });
+            } catch (e) { window.switchToLocalMode(); }
         };
 
         const setupListeners = () => {
@@ -415,29 +450,28 @@
                 if (st) st.innerText = "Synced Online (Shared)";
                 window.dismissLoading(); window.render(); 
             };
-            
-            onSnapshot(getPublicPath('inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
-            onSnapshot(getPublicPath('employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
-            onSnapshot(getPublicPath('checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => window.switchToLocalMode());
+            const colPath = (c) => collection(db, 'artifacts', appId, 'public', 'data', c);
+            onSnapshot(colPath('inventory'), s => { window.inventory = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => {});
+            onSnapshot(colPath('employees'), s => { window.employees = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => {});
+            onSnapshot(colPath('checkouts'), s => { window.checkouts = s.docs.map(d => ({id: d.id, ...d.data()})); check(); }, () => {});
         };
 
         const persistLocal = () => { if (!window.isLocalMode) return; localStorage.setItem('et_inventory', JSON.stringify(window.inventory)); localStorage.setItem('et_employees', JSON.stringify(window.employees)); localStorage.setItem('et_checkouts', JSON.stringify(window.checkouts)); window.render(); };
 
         window.exportSystemData = () => {
             const wb = XLSX.utils.book_new();
-            
             const inventoryData = window.inventory.map(i => {
                 const activeLoan = window.checkouts.find(c => c.itemId === i.id && c.status === 'active');
                 const borrower = activeLoan ? (window.employees.find(e => e.id === activeLoan.employeeId)?.name || activeLoan.empName || 'Unknown Staff') : 'In Storage';
                 return {
-                    "Model": i.name,
-                    "Category": i.category,
-                    "LaptopID": i.lnNumber,
-                    "SerialNumber": i.serial,
-                    "Condition": i.condition || 'Good',
-                    "Status": i.status === 'checked-out' ? 'On Loan' : 'Available',
-                    "CurrentBorrower": borrower,
-                    "SystemID": i.id
+                    Model: i.name,
+                    Category: i.category,
+                    LaptopID: i.lnNumber || '',
+                    SerialNumber: i.serial || '',
+                    Condition: i.condition || 'Good',
+                    Status: i.status === 'checked-out' ? 'On Loan' : 'Available',
+                    CurrentBorrower: borrower,
+                    SystemID: i.id
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inventoryData), "Inventory");
@@ -447,16 +481,15 @@
                 const empName = window.employees.find(e => e.id === c.employeeId)?.name || c.empName || 'Former Staff';
                 const item = window.inventory.find(i => i.id === c.itemId);
                 return {
-                    "Borrower": empName,
-                    "ItemModel": item?.name || 'Deleted Item',
-                    "LaptopID": item?.lnNumber || 'N/A',
-                    "SerialNumber": item?.serial || 'N/A',
-                    "CheckoutDate": c.checkoutDate,
-                    "Status": c.status,
-                    "ReturnDate": c.returnDate || 'N/A',
-                    "ReturnCondition": c.returnCondition || 'N/A',
-                    "ReturnNotes": c.returnNotes || 'N/A',
-                    "SystemID": c.id
+                    Borrower: empName,
+                    ItemModel: item?.name || 'Deleted Item',
+                    LaptopID: item?.lnNumber || 'N/A',
+                    SerialNumber: item?.serial || 'N/A',
+                    CheckoutDate: c.checkoutDate || '',
+                    Status: c.status || 'active',
+                    ReturnDate: c.returnDate || 'N/A',
+                    ReturnCondition: c.returnCondition || 'N/A',
+                    ReturnNotes: c.returnNotes || 'N/A'
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checkoutsData), "Checkout_History");
@@ -465,7 +498,7 @@
 
         window.exportEmployeeReceipt = (empId) => {
             const emp = window.employees.find(e => e.id === empId);
-            const actives = window.checkouts.filter(c => c.employeeId === empId && c.status === 'active');
+            const actives = window.checkouts.filter(c => c.status === 'active' && c.employeeId === empId);
             const data = actives.map(l => {
                 const item = window.inventory.find(i => i.id === l.itemId);
                 return {
@@ -474,7 +507,7 @@
                     "Laptop ID (LN)": item?.lnNumber || "N/A",
                     "Serial Number (SN)": item?.serial || "N/A",
                     "Condition": item?.condition || "N/A",
-                    "Checkout Date": l.checkoutDate
+                    "Checkout Date": l.checkoutDate || ""
                 };
             });
             const wb = XLSX.utils.book_new();
@@ -485,201 +518,184 @@
         window.triggerSystemRestore = () => document.getElementById('system-restore-input').click();
         
         window.processSystemRestore = (input) => {
-            const reader = new FileReader(); 
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
                     
-                    const clearCollection = async (colName) => {
-                        if (window.isLocalMode) return;
-                        const snap = await getDocs(getPublicPath(colName));
-                        const batchDeletes = snap.docs.map(d => deleteDoc(doc(getPublicPath(colName), d.id)));
-                        await Promise.all(batchDeletes);
+                    const empSheet = workbook.Sheets["Employees"];
+                    const newEmployeesRaw = empSheet ? XLSX.utils.sheet_to_json(empSheet) : [];
+                    
+                    const invSheet = workbook.Sheets["Inventory"];
+                    const newInventoryRows = invSheet ? XLSX.utils.sheet_to_json(invSheet) : [];
+                    
+                    const chkSheet = workbook.Sheets["Checkout_History"] || workbook.Sheets["Checkout History"];
+                    const newCheckoutsRaw = chkSheet ? XLSX.utils.sheet_to_json(chkSheet) : [];
+
+                    const parsedEmployees = newEmployeesRaw.map((r, idx) => ({
+                        id: (r.ID || 'e' + Date.now() + idx).toString().trim(),
+                        name: (r.Name || '').toString().trim(),
+                        department: (r.Department || 'General').toString().trim()
+                    })).filter(e => e.name);
+
+                    const empNameMap = new Map(parsedEmployees.map(e => [e.name.toLowerCase(), e.id]));
+
+                    const getOrCreateEmpId = (bName) => {
+                        const cleanName = (bName || '').toString().trim();
+                        if (!cleanName || cleanName.toLowerCase() === 'in storage' || cleanName.toLowerCase() === 'null' || cleanName.toLowerCase() === 'nan' || cleanName.toLowerCase() === 'ffg madison - cube') return null;
+                        let empId = empNameMap.get(cleanName.toLowerCase());
+                        if (!empId) {
+                            empId = 'e' + Date.now() + Math.random().toString(36).substr(2, 5);
+                            empNameMap.set(cleanName.toLowerCase(), empId);
+                            parsedEmployees.push({ id: empId, name: cleanName, department: 'General' });
+                        }
+                        return empId;
                     };
 
-                    // 1. Restore Employees First
-                    const empWs = workbook.Sheets["Employees"];
-                    const employeesMap = new Map(); // Name (lower) -> Employee ID
-                    if (empWs) {
-                        const empJson = XLSX.utils.sheet_to_json(empWs);
-                        if (!window.isLocalMode) await clearCollection('employees');
-                        window.employees = [];
+                    const parsedInventory = newInventoryRows.map((r, idx) => {
+                        const id = (r.SystemID || ('inv_' + idx + '_' + Date.now())).toString().trim();
+                        const name = (r.Model || r.ItemModel || 'Unknown Model').toString().trim();
+                        const category = (r.Category || 'Other').toString().trim();
+                        const lnNumber = (r.LaptopID && r.LaptopID !== 'N/A' && r.LaptopID !== 'nan') ? r.LaptopID.toString().trim() : '';
+                        const serial = (r.SerialNumber && r.SerialNumber !== 'N/A' && r.SerialNumber !== 'nan') ? r.SerialNumber.toString().trim() : '';
+                        const condition = (r.Condition || 'Good').toString().trim();
+                        const borrower = (r.CurrentBorrower || '').toString().trim();
+                        const statusRaw = (r.Status || '').toString().toLowerCase();
+                        
+                        const isOnLoan = statusRaw.includes('loan') || (borrower && borrower.toLowerCase() !== 'in storage' && borrower.toLowerCase() !== 'null' && borrower.toLowerCase() !== 'nan');
+                        
+                        return {
+                            id,
+                            name,
+                            category,
+                            lnNumber,
+                            serial,
+                            condition,
+                            status: isOnLoan ? 'checked-out' : 'available',
+                            currentBorrower: isOnLoan ? borrower : null
+                        };
+                    });
 
-                        for (const row of empJson) {
-                            const id = row.ID?.toString() || ('e' + Date.now() + Math.random());
-                            const name = (row.Name || 'Unknown Staff').trim();
-                            const dept = row.Department || 'General';
-                            const empEntry = { id: id, name: name, department: dept };
-                            
-                            employeesMap.set(name.toLowerCase(), id);
-                            if (window.isLocalMode) {
-                                window.employees.push(empEntry);
-                            } else {
-                                await setDoc(doc(getPublicPath('employees'), id), { name: name, department: dept });
-                            }
+                    const parsedCheckouts = [];
+
+                    // 1. Process past returned history from Checkout_History
+                    newCheckoutsRaw.forEach((r, idx) => {
+                        const isAct = (r.Status || '').toString().toLowerCase() === 'active';
+                        if (isAct) return; // Active checkouts are driven directly by Inventory's CurrentBorrower for 100% assignment precision
+
+                        const bName = (r.Borrower || '').toString().trim();
+                        const empId = getOrCreateEmpId(bName);
+                        if (!empId) return;
+
+                        const modelName = (r.ItemModel || r.Model || '').toString().trim();
+                        const ln = (r.LaptopID && r.LaptopID !== 'N/A' && r.LaptopID !== 'nan') ? r.LaptopID.toString().trim() : '';
+                        const sn = (r.SerialNumber && r.SerialNumber !== 'N/A' && r.SerialNumber !== 'nan') ? r.SerialNumber.toString().trim() : '';
+
+                        let matchedUnit = parsedInventory.find(i => {
+                            if (sn && i.serial && i.serial.toLowerCase() === sn.toLowerCase()) return true;
+                            if (ln && i.lnNumber && i.lnNumber.toLowerCase() === ln.toLowerCase()) return true;
+                            if (modelName && i.name.toLowerCase() === modelName.toLowerCase()) return true;
+                            return false;
+                        });
+
+                        if (matchedUnit) {
+                            parsedCheckouts.push({
+                                id: 'chk_hist_' + Date.now() + '_' + idx,
+                                itemId: matchedUnit.id,
+                                employeeId: empId,
+                                empName: bName,
+                                checkoutDate: r.CheckoutDate ? r.CheckoutDate.toString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                status: 'returned',
+                                returnDate: (r.ReturnDate && r.ReturnDate !== 'N/A' && r.ReturnDate !== 'nan') ? r.ReturnDate.toString().split('T')[0] : null,
+                                returnCondition: (r.ReturnCondition && r.ReturnCondition !== 'N/A' && r.ReturnCondition !== 'nan') ? r.ReturnCondition.toString() : null,
+                                returnNotes: (r.ReturnNotes && r.ReturnNotes !== 'N/A' && r.ReturnNotes !== 'nan') ? r.ReturnNotes.toString() : null
+                            });
                         }
-                    }
+                    });
 
-                    // 2. Restore Inventory Items
-                    const invWs = workbook.Sheets["Inventory"];
-                    if (!window.isLocalMode) await clearCollection('inventory');
-                    window.inventory = [];
-                    const tempInventory = [];
-
-                    if (invWs) {
-                        const invJson = XLSX.utils.sheet_to_json(invWs);
-                        for (const row of invJson) {
-                            const id = row.SystemID?.toString() || (Date.now().toString() + Math.random());
-                            const statusStr = row.Status || '';
-                            const borrowerStr = (row.CurrentBorrower || '').trim();
-                            const isOnLoan = statusStr.toLowerCase() === 'on loan' || statusStr.toLowerCase() === 'checked-out' || (borrowerStr && borrowerStr.toLowerCase() !== 'in storage');
-                            
-                            const itemEntry = {
-                                id: id,
-                                name: (row.Model || 'Unnamed Asset').trim(),
-                                category: row.Category || 'Other',
-                                lnNumber: row.LaptopID ? row.LaptopID.toString().trim() : '',
-                                serial: row.SerialNumber ? row.SerialNumber.toString().trim() : '',
-                                condition: row.Condition || 'Good',
-                                status: isOnLoan ? 'checked-out' : 'available',
-                                currentBorrower: borrowerStr
-                            };
-                            tempInventory.push(itemEntry);
-
-                            if (window.isLocalMode) {
-                                window.inventory.push(itemEntry);
-                            } else {
-                                await setDoc(doc(getPublicPath('inventory'), id), {
-                                    name: itemEntry.name,
-                                    category: itemEntry.category,
-                                    lnNumber: itemEntry.lnNumber,
-                                    serial: itemEntry.serial,
-                                    condition: itemEntry.condition,
-                                    status: itemEntry.status
+                    // 2. Generate definitive active loans directly from Inventory's CurrentBorrower assignments
+                    parsedInventory.forEach((invUnit, idx) => {
+                        if (invUnit.status === 'checked-out' && invUnit.currentBorrower) {
+                            const empId = getOrCreateEmpId(invUnit.currentBorrower);
+                            if (empId) {
+                                parsedCheckouts.push({
+                                    id: 'chk_active_' + Date.now() + '_' + idx,
+                                    itemId: invUnit.id,
+                                    employeeId: empId,
+                                    empName: invUnit.currentBorrower,
+                                    checkoutDate: new Date().toISOString().split('T')[0],
+                                    status: 'active',
+                                    returnDate: null,
+                                    returnCondition: null,
+                                    returnNotes: null
                                 });
                             }
                         }
+                    });
+
+                    if (window.isLocalMode) {
+                        window.employees = parsedEmployees;
+                        window.inventory = parsedInventory.map(i => ({ id: i.id, name: i.name, category: i.category, lnNumber: i.lnNumber, serial: i.serial, condition: i.condition, status: i.status }));
+                        window.checkouts = parsedCheckouts;
+                        persistLocal();
+                    } else {
+                        const batch = writeBatch(db);
+
+                        const [invSnap, empSnap, chkSnap] = await Promise.all([
+                            getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'inventory')),
+                            getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'employees')),
+                            getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'checkouts'))
+                        ]);
+
+                        invSnap.docs.forEach(d => batch.delete(d.ref));
+                        empSnap.docs.forEach(d => batch.delete(d.ref));
+                        chkSnap.docs.forEach(d => batch.delete(d.ref));
+
+                        parsedEmployees.forEach(emp => {
+                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', emp.id), { name: emp.name, department: emp.department });
+                        });
+
+                        parsedInventory.forEach(inv => {
+                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', inv.id), {
+                                name: inv.name,
+                                category: inv.category,
+                                lnNumber: inv.lnNumber,
+                                serial: inv.serial,
+                                condition: inv.condition,
+                                status: inv.status
+                            });
+                        });
+
+                        parsedCheckouts.forEach(chk => {
+                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', chk.id), {
+                                itemId: chk.itemId,
+                                employeeId: chk.employeeId,
+                                empName: chk.empName,
+                                checkoutDate: chk.checkoutDate,
+                                status: chk.status,
+                                returnDate: chk.returnDate || null,
+                                returnCondition: chk.returnCondition || null,
+                                returnNotes: chk.returnNotes || null
+                            });
+                        });
+
+                        await batch.commit();
+                        window.inventory = parsedInventory.map(i => ({ id: i.id, name: i.name, category: i.category, lnNumber: i.lnNumber, serial: i.serial, condition: i.condition, status: i.status }));
+                        window.employees = parsedEmployees;
+                        window.checkouts = parsedCheckouts;
                     }
 
-                    // 3. Restore Checkout & History Logs & Reconstruct Active Loans accurately without NULLs
-                    if (!window.isLocalMode) await clearCollection('checkouts');
-                    window.checkouts = [];
-
-                    const histWs = workbook.Sheets["Checkout_History"] || workbook.Sheets["Checkout History"];
-                    const processedLoanIds = new Set();
-
-                    if (histWs) {
-                        const histJson = XLSX.utils.sheet_to_json(histWs);
-                        for (let idx = 0; idx < histJson.length; idx++) {
-                            const row = histJson[idx];
-                            const loanId = row.SystemID?.toString() || ('c' + Date.now() + idx);
-                            if (processedLoanIds.has(loanId)) continue;
-                            processedLoanIds.add(loanId);
-
-                            const borrowerName = (row.Borrower || '').trim();
-                            if (!borrowerName || borrowerName.toLowerCase() === 'in storage' || borrowerName.toLowerCase() === 'null') continue;
-                            
-                            let employeeId = employeesMap.get(borrowerName.toLowerCase());
-                            if (!employeeId) {
-                                employeeId = 'e' + Date.now() + Math.random();
-                                const newEmp = { id: employeeId, name: borrowerName, department: 'General' };
-                                employeesMap.set(borrowerName.toLowerCase(), employeeId);
-                                window.employees.push(newEmp);
-                                if (!window.isLocalMode) {
-                                    await setDoc(doc(getPublicPath('employees'), employeeId), { name: newEmp.name, department: newEmp.department });
-                                }
-                            }
-
-                            // Match specific item by Serial Number or Laptop ID or Model name
-                            let targetItem = null;
-                            const itemModel = (row.ItemModel || '').trim();
-                            const serial = row.SerialNumber ? row.SerialNumber.toString().trim() : '';
-                            const lnNum = row.LaptopID ? row.LaptopID.toString().trim() : '';
-
-                            if (serial && serial !== 'N/A' && serial !== 'NaN' && serial !== 'null') {
-                                targetItem = tempInventory.find(i => i.serial === serial);
-                            }
-                            if (!targetItem && lnNum && lnNum !== 'N/A' && lnNum !== 'NaN' && lnNum !== 'null') {
-                                targetItem = tempInventory.find(i => i.lnNumber === lnNum);
-                            }
-                            if (!targetItem && itemModel) {
-                                targetItem = tempInventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase() && (!i.currentBorrower || i.currentBorrower.toLowerCase() === borrowerName.toLowerCase()));
-                            }
-                            if (!targetItem && itemModel) {
-                                targetItem = tempInventory.find(i => i.name.toLowerCase() === itemModel.toLowerCase());
-                            }
-
-                            const itemId = targetItem ? targetItem.id : ('i' + Date.now() + Math.random());
-                            const isAct = (row.Status || '').toLowerCase() === 'active' || (row.Status || '').toLowerCase() === 'on loan';
-
-                            const loanEntry = {
-                                id: loanId,
-                                itemId: itemId,
-                                employeeId: employeeId,
-                                empName: borrowerName,
-                                checkoutDate: row.CheckoutDate || new Date().toISOString().split('T')[0],
-                                status: isAct ? 'active' : 'returned',
-                                returnDate: (row.ReturnDate && row.ReturnDate !== 'N/A') ? row.ReturnDate : '',
-                                returnCondition: (row.ReturnCondition && row.ReturnCondition !== 'N/A') ? row.ReturnCondition : '',
-                                returnNotes: (row.ReturnNotes && row.ReturnNotes !== 'N/A') ? row.ReturnNotes : ''
-                            };
-
-                            window.checkouts.push(loanEntry);
-                            if (!window.isLocalMode) {
-                                await setDoc(doc(getPublicPath('checkouts'), loanId), loanEntry);
-                                if (isAct && targetItem) {
-                                    await updateDoc(doc(getPublicPath('inventory'), targetItem.id), { status: 'checked-out' });
-                                }
-                            } else if (isAct && targetItem) {
-                                targetItem.status = 'checked-out';
-                            }
-                        }
-                    }
-
-                    // 4. Fallback: Catch any inventory items with a valid CurrentBorrower in the Inventory sheet not covered in history
-                    for (const item of tempInventory) {
-                        if (item.currentBorrower && item.currentBorrower.toLowerCase() !== 'in storage' && item.currentBorrower.toLowerCase() !== 'null') {
-                            const existing = window.checkouts.find(c => c.itemId === item.id && c.status === 'active');
-                            if (!existing) {
-                                let empId = employeesMap.get(item.currentBorrower.toLowerCase());
-                                if (!empId) {
-                                    empId = 'e' + Date.now() + Math.random();
-                                    employeesMap.set(item.currentBorrower.toLowerCase(), empId);
-                                    window.employees.push({ id: empId, name: item.currentBorrower, department: 'General' });
-                                    if (!window.isLocalMode) {
-                                        await setDoc(doc(getPublicPath('employees'), empId), { name: item.currentBorrower, department: 'General' });
-                                    }
-                                }
-                                const loanId = 'c_inv_' + item.id;
-                                const loanEntry = {
-                                    id: loanId,
-                                    itemId: item.id,
-                                    employeeId: empId,
-                                    empName: item.currentBorrower,
-                                    checkoutDate: new Date().toISOString().split('T')[0],
-                                    status: 'active'
-                                };
-                                window.checkouts.push(loanEntry);
-                                if (!window.isLocalMode) {
-                                    await setDoc(doc(getPublicPath('checkouts'), loanId), loanEntry);
-                                    await updateDoc(doc(getPublicPath('inventory'), item.id), { status: 'checked-out' });
-                                } else {
-                                    item.status = 'checked-out';
-                                }
-                            }
-                        }
-                    }
-
-                    if (window.isLocalMode) persistLocal();
-                    alert("Complete System Backup Restored Successfully with Precise Asset Assignments!");
+                    alert("System Restored Successfully! All unit assignments, serial numbers, and staff links have been precisely synchronized from the spreadsheet.");
                     window.render();
                 } catch (err) {
                     console.error("Restore failed:", err);
-                    alert("Failed to restore backup. Please verify your Excel file format.");
+                    alert("Restore failed. Please verify that you uploaded a valid EquipTrack Excel backup file.");
                 }
                 input.value = '';
             };
-            reader.readAsArrayBuffer(input.files[0]);
+            reader.readAsArrayBuffer(file);
         };
 
         window.setView = (v) => { 
@@ -748,17 +764,17 @@
                 const cur = window.inventory.find(i=>i.id===window.editingItemId);
                 const data = { name, category, lnNumber: ln, serial: sn, condition, status: cur.status };
                 if (window.isLocalMode) { const idx = window.inventory.findIndex(i=>i.id===window.editingItemId); window.inventory[idx] = {id: window.editingItemId, ...data}; persistLocal(); }
-                else await setDoc(doc(getPublicPath('inventory'), window.editingItemId), data);
+                else await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', window.editingItemId), data);
             } else {
                 for (let i = 0; i < qty; i++) {
                     const id = Date.now().toString() + i;
                     const isAssigned = qty === 1 && assignedId;
                     const data = { name, category, lnNumber: qty > 1 ? "" : ln, serial: qty > 1 ? "" : sn, condition, status: isAssigned ? 'checked-out' : 'available' };
-                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(getPublicPath('inventory'), id), data); }
+                    if (window.isLocalMode) { window.inventory.push({id, ...data}); } else { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', id), data); }
                     if (isAssigned) {
                         const empName = window.employees.find(e=>e.id===assignedId)?.name;
                         const loan = { itemId: id, employeeId: assignedId, empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
-                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(getPublicPath('checkouts'), 'c'+id), loan); }
+                        if (window.isLocalMode) { window.checkouts.push({id: 'c'+id, ...loan}); } else { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', 'c'+id), loan); }
                     }
                 }
                 if (window.isLocalMode) persistLocal();
@@ -785,7 +801,7 @@
                 const idx = window.employees.findIndex(e => e.id === id);
                 if (idx > -1) window.employees[idx] = { id, ...data }; else window.employees.push({ id, ...data });
                 persistLocal();
-            } else await setDoc(doc(getPublicPath('employees'), id), data, { merge: true });
+            } else await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'employees', id), data, { merge: true });
             window.editingEmployeeId = null;
             window.closeModal('employee-modal');
         };
@@ -857,7 +873,10 @@
                     if (!unit) break;
                     const loan = { itemId: unit.id, employeeId: empId, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
                     if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now()+uIdx, ...loan}); window.inventory.find(inv=>inv.id===unit.id).status = 'checked-out'; }
-                    else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()+uIdx), loan); await updateDoc(doc(getPublicPath('inventory'), unit.id), { status: 'checked-out' }); }
+                    else { 
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', 'c'+Date.now()+uIdx), loan); 
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', unit.id), { status: 'checked-out' }); 
+                    }
                 }
             }
             if (window.isLocalMode) persistLocal();
@@ -874,12 +893,100 @@
             document.getElementById('checkout-modal')?.classList.remove('hidden');
         };
 
+        window.openInventoryAuditModal = () => {
+            const totalUnits = window.inventory.length;
+            const activeLoans = window.checkouts.filter(c => c.status === 'active');
+            const checkedOutUnits = window.inventory.filter(i => i.status === 'checked-out').length;
+            
+            const msgEl = document.getElementById('audit-status-message');
+            const orphanedBody = document.getElementById('audit-orphaned-loans-body');
+
+            const orphaned = activeLoans.filter(l => {
+                const item = window.inventory.find(i => i.id === l.itemId);
+                return !item || item.status !== 'checked-out';
+            });
+
+            const hasDiscrepancy = activeLoans.length > totalUnits || orphaned.length > 0;
+
+            if (hasDiscrepancy) {
+                msgEl.innerText = `Discrepancy Detected! Active loans: ${activeLoans.length}, Total inventory units: ${totalUnits} (${checkedOutUnits} flagged checked out).`;
+            } else {
+                msgEl.innerText = `Inventory is balanced. Total units: ${totalUnits} | Active loans: ${activeLoans.length}.`;
+            }
+
+            orphanedBody.innerHTML = orphaned.length ? orphaned.map(l => {
+                const empName = l.empName || window.employees.find(e => e.id === l.employeeId)?.name || 'Unknown Staff';
+                const item = window.inventory.find(i => i.id === l.itemId);
+                return `<tr class="hover:bg-white">
+                    <td class="px-6 py-4 uppercase">${empName}</td>
+                    <td class="px-6 py-4 text-slate-400">Loan ID: ${l.id} (${item ? item.name : 'Missing Item ID: ' + l.itemId})</td>
+                    <td class="px-6 py-4 text-right pr-6"><button onclick="forceReturnLoan('${l.id}')" class="px-4 py-2 bg-red-600 text-white text-[9px] font-black uppercase rounded-xl">Force Return</button></td>
+                </tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-6 text-center text-slate-400 font-black uppercase">No orphaned ghost loans found.</td></tr>';
+
+            document.getElementById('audit-modal').classList.remove('hidden');
+            if(window.lucide) lucide.createIcons();
+        };
+
+        window.forceReturnLoan = async (loanId) => {
+            const loan = window.checkouts.find(c => c.id === loanId);
+            if (!loan) return;
+            if (window.isLocalMode) {
+                loan.status = 'returned';
+                loan.returnDate = new Date().toISOString().split('T')[0];
+                const item = window.inventory.find(i => i.id === loan.itemId);
+                if (item) item.status = 'available';
+                persistLocal();
+            } else {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', loanId), {
+                    status: 'returned',
+                    returnDate: new Date().toISOString().split('T')[0]
+                });
+                const item = window.inventory.find(i => i.id === loan.itemId);
+                if (item) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { status: 'available' });
+                }
+            }
+            window.openInventoryAuditModal();
+        };
+
+        window.autoReconcileDiscrepancies = async () => {
+            const activeLoans = window.checkouts.filter(c => c.status === 'active');
+            let fixedCount = 0;
+            
+            for (const l of activeLoans) {
+                const item = window.inventory.find(i => i.id === l.itemId);
+                if (!item || item.status === 'available') {
+                    fixedCount++;
+                    if (window.isLocalMode) {
+                        l.status = 'returned';
+                        l.returnDate = new Date().toISOString().split('T')[0];
+                    } else {
+                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', l.id), {
+                            status: 'returned',
+                            returnDate: new Date().toISOString().split('T')[0]
+                        });
+                        if (item) {
+                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', item.id), { status: 'available' });
+                        }
+                    }
+                }
+            }
+
+            alert(`Audit Complete: Resolved ${fixedCount} discrepancy issues.`);
+            window.closeModal('audit-modal');
+            window.render();
+        };
+
         window.confirmCheckout = async () => {
             const eid = document.getElementById('modal-employee-select').value; if(!eid) return;
             const empName = window.employees.find(e=>e.id===eid)?.name;
             const loan = { itemId: window.selectedItemId, employeeId: eid, empName: empName, checkoutDate: new Date().toISOString().split('T')[0], status: 'active' };
             if (window.isLocalMode) { window.checkouts.push({id: 'c'+Date.now(), ...loan}); window.inventory.find(i=>i.id===window.selectedItemId).status = 'checked-out'; persistLocal(); }
-            else { await setDoc(doc(getPublicPath('checkouts'), 'c'+Date.now()), loan); await updateDoc(doc(getPublicPath('inventory'), window.selectedItemId), { status: 'checked-out' }); }
+            else { 
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', 'c'+Date.now()), loan); 
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', window.selectedItemId), { status: 'checked-out' }); 
+            }
             window.closeModal('checkout-modal');
         };
 
@@ -922,32 +1029,27 @@
                 }
                 persistLocal();
             } else {
-                await updateDoc(doc(getPublicPath('checkouts'), lid), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', lid), {
                     status: 'returned',
                     returnDate: returnDate,
                     returnCondition: cond,
                     returnNotes: notes
                 });
-                await updateDoc(doc(getPublicPath('inventory'), loan.itemId), {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', loan.itemId), {
                     status: 'available',
                     condition: cond
                 });
             }
             window.closeModal('return-modal');
-            window.closeModal('unit-modal');
         };
 
         window.initiateDelete = (type, id) => { window.deleteTarget = { type, id }; document.getElementById('delete-modal').classList.remove('hidden'); if (window.lucide) lucide.createIcons(); };
         window.confirmDelete = async () => {
             if (!window.deleteTarget) return;
             const { type, id } = window.deleteTarget;
-            const colName = type === 'employee' ? 'employees' : 'inventory';
-            if (window.isLocalMode) { 
-                window[colName] = window[colName].filter(x => x.id !== id); 
-                persistLocal(); 
-            } else {
-                await deleteDoc(doc(getPublicPath(colName), id));
-            }
+            const col = type === 'employee' ? 'employees' : 'inventory';
+            if (window.isLocalMode) { window[col] = window[col].filter(x => x.id !== id); persistLocal(); }
+            else await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
             window.deleteTarget = null;
             window.closeModal('delete-modal');
         };
@@ -961,8 +1063,8 @@
                 const displayName = h.empName || window.employees.find(e => e.id === h.employeeId)?.name || 'Former Staff';
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight text-left">${displayName}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest text-left">No previous assignment logs found.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight">${displayName}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic">${h.checkoutDate} ${h.returnDate ? '→ ' + h.returnDate : ''}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-300 font-black text-[10px] uppercase tracking-widest">No previous assignment logs found.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
@@ -975,8 +1077,8 @@
                 const item = window.inventory.find(i => i.id === h.itemId) || { name: 'Deleted Item', lnNumber: 'N/A' };
                 const condInfo = h.returnCondition ? ` (${h.returnCondition})` : '';
                 const notesInfo = h.returnNotes ? `<div class="text-[10px] text-slate-500 italic mt-0.5">Notes: ${h.returnNotes}</div>` : '';
-                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6 text-left"><div><div class="text-sm font-black text-black uppercase tracking-tight italic text-left">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1 text-left">ID: ${item.lnNumber || 'N/A'} • SN: ${item.serial || 'N/A'}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic text-left">${h.checkoutDate}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase text-right">${h.status}${condInfo}</td></tr>`;
-            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-400 font-black text-[10px] uppercase text-left">No logs registered.</td></tr>';
+                return `<tr class="hover:bg-slate-50 text-left"><td class="px-10 py-6"><div><div class="text-sm font-black text-black uppercase tracking-tight italic">${item.name}</div><div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-1">ID: ${item.lnNumber || 'N/A'}</div>${notesInfo}</div></td><td class="px-10 py-6 text-xs font-bold text-slate-300 tracking-widest italic">${h.checkoutDate}</td><td class="px-10 py-6 text-right pr-10 text-xs font-black ${h.status==='active'?'text-[#3c78e6]':'text-slate-400'} tracking-[0.2em] uppercase">${h.status}${condInfo}</td></tr>`;
+            }).join('') : '<tr><td colspan="3" class="p-20 text-center italic text-slate-400 font-black text-[10px] uppercase">No logs registered.</td></tr>';
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
@@ -987,7 +1089,7 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active-nav', b.dataset.view === window.currentView));
             document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active-nav-mobile', b.dataset.mView === window.currentView));
             const area = document.getElementById('content-area');
-            const actives = window.checkouts.filter(c => c.status === 'active');
+            const actives = window.checkouts.filter(c => c.status === 'active' && window.inventory.some(i => i.id === c.itemId && i.status === 'checked-out'));
             
             if (window.currentView === 'dashboard') {
                 const qLoans = actives.filter(l => {
@@ -1004,13 +1106,13 @@
                         ${renderStatCard('Employees', window.employees.length, 'users', 'bg-blue-50', 'text-[#3c78e6]')}
                     </div>
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 text-left">
-                        <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3 text-left">Live Overview</h3>
-                        <div class="divide-y divide-slate-50 text-left">
+                        <h3 class="font-black text-black mb-6 uppercase text-[10px] tracking-[0.2em] italic border-b border-slate-50 pb-3">Live Overview</h3>
+                        <div class="divide-y divide-slate-50">
                             ${qLoans.slice(0,12).map(l => {
                                 const i = window.inventory.find(inv=>inv.id===l.itemId);
                                 const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
-                                return `<div class="py-3.5 text-sm flex justify-between items-center group text-left">
-                                    <div class="text-left">
+                                return `<div class="py-3.5 text-sm flex justify-between items-center group">
+                                    <div>
                                         <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors">${i?.name}</div>
                                         <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     </div>
@@ -1040,9 +1142,9 @@
                 
                 list.sort((a,b) => { let d = window.sort.dir === 'asc' ? 1 : -1; if (window.sort.field === 'name') return a.name.localeCompare(b.name) * d; return (a.count - b.count) * d; });
                 
-                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b"><tr><th class="w-12"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase">Item Info</th><th class="px-6 py-4 tracking-widest uppercase">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase">Management</th></tr></thead><tbody class="divide-y divide-slate-50">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); return `<tr onclick="toggleInventoryModel('${m.name}')" class="cursor-pointer hover:bg-slate-50 transition-colors"><td class="text-center"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300"></i></td><td class="px-6 py-4"><div class="font-black text-black text-sm uppercase italic tracking-tighter">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5">${m.cat}</div></td><td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'}">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30"><td colspan="4" class="p-3 px-6">
-                    <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5" oninput="renderUnitSublist('${m.name}', this.value)" /></div>
-                    <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden"><tbody id="sublist-${m.name.replace(/\s+/g, '-')}"></tbody></table>
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-500 border-b"><tr><th class="w-12"></th><th onclick="toggleSort('name')" class="px-6 py-4 sortable tracking-widest uppercase">Item Info</th><th class="px-6 py-4 tracking-widest uppercase">Availability</th><th class="hidden md:table-cell px-6 py-4 text-right pr-6 tracking-widest uppercase">Management</th></tr></thead><tbody class="divide-y divide-slate-50">${list.map(m => {const isEx = window.expandedInventoryModels.has(m.name); const safeId = m.name.replace(/[^a-zA-Z0-9]/g, '_'); return `<tr onclick="toggleInventoryModel('${m.name.replace(/'/g, "\\'")}')" class="cursor-pointer hover:bg-slate-50 transition-colors"><td class="text-center"><i data-lucide="${isEx?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-300"></i></td><td class="px-6 py-4"><div class="font-black text-black text-sm uppercase italic tracking-tighter">${m.name}</div><div class="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5">${m.cat}</div></td><td class="px-6 py-4"><span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${m.available>0?'bg-emerald-50 text-emerald-700':'bg-red-50 text-red-700'}">${m.available} / ${m.count} Available</span></td><td class="hidden md:table-cell px-6 py-4 text-right pr-6">${m.available>0?`<button onclick="event.stopPropagation(); openBulkCheckout('${m.name.replace(/'/g, "\\'")}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full hover:bg-[#CC0000] transition-all shadow-md">Bulk assignment</button>`:''}</td></tr>${isEx ? `<tr class="bg-slate-100/30"><td colspan="4" class="p-3 px-6">
+                    <div class="relative max-w-sm mb-3"><i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-300"></i><input type="text" placeholder="Filter units..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-black/5" oninput="renderUnitSublist('${m.name.replace(/'/g, "\\'")}', this.value)" /></div>
+                    <table class="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden"><tbody id="sublist-${safeId}"></tbody></table>
                 </td></tr>` : ''}`;}).join('')}</tbody></table></div>`;
                 
                 list.forEach(m => { if (window.expandedInventoryModels.has(m.name)) window.renderUnitSublist(m.name, window.searchQuery || ''); });
@@ -1056,27 +1158,21 @@
                         if (match) window.expandedEmployees.add(l.employeeId); return match;
                     });
                 }
-                const grouped = fLoans.reduce((acc, l) => {
-                    const empObj = window.employees.find(e=>e.id===l.employeeId);
-                    const name = l.empName || empObj?.name || 'Unknown Staff';
-                    if(!acc[l.employeeId]) acc[l.employeeId] = { eName: name, loans: [] };
-                    acc[l.employeeId].loans.push(l);
-                    return acc;
-                }, {});
-
-                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b"><tr><th class="w-12"></th><th class="px-6 py-4 tracking-widest uppercase">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-100">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter">${grouped[id].eName}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black"><div class="text-xs font-black text-slate-700 uppercase tracking-widest">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em]">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic">No active loan records.</td></tr>'}</tbody></table></div>`;
+                const grouped = fLoans.reduce((acc, l) => { const name = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name; if(!acc[l.employeeId]) acc[l.employeeId] = { eName: name, loans: [] }; acc[l.employeeId].loans.push(l); return acc; }, {});
+                area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b"><tr><th class="w-12"></th><th class="px-6 py-4 tracking-widest uppercase">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black"><div class="text-xs font-black text-slate-700 uppercase tracking-widest">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em]">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic">No active loan records.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5"></i> Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl" title="Download Asset Receipt"><i data-lucide="download" class="w-3.5 h-3.5"></i> Receipt</button> </div> </div>`}).join('')}`;
+                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5"></i> Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl" title="Download Asset Receipt"><i data-lucide="download" class="w-3.5 h-3.5"></i> Receipt</button> </div> </div>`}).join('')}`;
             }
             if (window.lucide) lucide.createIcons();
         };
 
         window.renderUnitSublist = (modelName, subSearch) => {
-            const container = document.getElementById(`sublist-${modelName.replace(/\s+/g, '-')}`);
+            const safeId = modelName.replace(/[^a-zA-Z0-9]/g, '_');
+            const container = document.getElementById(`sublist-${safeId}`);
             if (!container) return;
             const units = window.inventory.filter(i => i.name === modelName);
-            const currentActives = window.checkouts.filter(c => c.status === 'active');
+            const currentActives = window.checkouts.filter(c => c.status === 'active' && window.inventory.some(i => i.id === c.itemId && i.status === 'checked-out'));
             const filtered = units.filter(u => {
                 const detailMatch = !subSearch || (u.lnNumber && u.lnNumber.toLowerCase().includes(subSearch.toLowerCase())) || (u.serial && u.serial.toLowerCase().includes(subSearch.toLowerCase()));
                 const loan = currentActives.find(c => c.itemId === u.id);
@@ -1087,8 +1183,7 @@
 
             container.innerHTML = filtered.map(u => {
                 const loan = currentActives.find(c => c.itemId === u.id);
-                const empObj = loan ? window.employees.find(e => e.id === loan.employeeId) : null;
-                const bName = loan ? (loan.empName || empObj?.name || 'Staff') : null;
+                const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
                 const condBadge = u.condition ? `<span class="px-2 py-0.5 rounded text-[9px] font-black bg-slate-100 text-slate-600 uppercase tracking-widest ml-2">${u.condition}</span>` : '';
                 return `<tr class="border-b last:border-0 border-slate-50"><td class="px-6 py-3.5"><div class="text-sm font-black text-slate-800 uppercase tracking-tight">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3">
                     <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5"></i></button>
@@ -1100,7 +1195,6 @@
             if (window.lucide) lucide.createIcons();
         };
 
-        window.toggleMobileAddMenu = () => document.getElementById('mobile-add-menu')?.classList.toggle('hidden');
         window.addEventListener('click', (e) => { const d = document.getElementById('add-dropdown'); if(d && !e.target.closest('#add-new-btn')) d.classList.add('hidden'); });
         
         init();
