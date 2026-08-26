@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --espn-red: #CC0000;
@@ -16,28 +17,36 @@
             --espn-grey: #f2f2f2;
         }
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         .active-nav { background-color: white; color: var(--espn-red) !important; font-weight: 800; border-radius: 0 50px 50px 0; margin-right: -1rem; }
         .active-nav .lucide { color: var(--espn-red); }
         .active-nav-mobile { color: var(--espn-red); border-bottom: 4px solid var(--espn-red); padding-bottom: 8px; }
-        
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
         #loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .hidden-overlay { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity 0.3s; }
-        
         .sortable { cursor: pointer; transition: background 0.2s; }
         .sortable:hover { background-color: #f8fafc; }
-        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
+
+    <script>
+        window.switchToLocalMode = function() {
+            if (typeof window.executeSwitchToLocalMode === 'function') {
+                window.executeSwitchToLocalMode();
+            } else {
+                window.isLocalMode = true;
+                var overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.classList.add('hidden-overlay');
+                var dot = document.getElementById('status-dot');
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500';
+                var st = document.getElementById('status-text');
+                if (st) st.innerText = 'Local Mode (Fallback)';
+            }
+        };
+    </script>
 </head>
 <body class="bg-[#f2f2f2] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 text-left">
 
@@ -45,10 +54,11 @@
         <div class="w-14 h-14 border-4 border-[#CC0000] border-t-transparent rounded-full animate-spin mb-6"></div>
         <p class="text-black font-black uppercase tracking-tighter text-xl italic">EquipTrack</p>
         <p id="loading-text" class="text-slate-400 text-xs font-bold mt-2 uppercase tracking-widest text-left">Accessing Asset Database...</p>
-        <button id="bypass-btn" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full hidden">Local Bypass</button>
+        <button id="bypass-btn" onclick="switchToLocalMode()" class="mt-8 px-8 py-3 bg-[#CC0000] text-white text-xs font-black uppercase tracking-widest rounded-full">Local Bypass</button>
     </div>
 
-    <input type="file" id="system-restore-input" class="hidden" accept=".xlsx" onchange="processSystemRestore(this)">
+    <!-- Hidden Input for System Restore -->
+    <input type="file" id="system-restore-input" class="hidden" accept=".xlsx,.xls,.csv" onchange="processSystemRestore(this)">
 
     <aside class="hidden md:flex w-64 bg-[#CC0000] flex-col h-screen sticky top-0 shadow-2xl overflow-hidden">
         <div class="p-8 cursor-pointer group" onclick="setView('dashboard')">
@@ -130,7 +140,7 @@
                 <div id="filter-toolbar" class="flex items-center">
                     <div class="bg-white text-black border border-slate-200 px-4 py-3 rounded-2xl flex items-center gap-3 shadow-sm">
                         <i data-lucide="filter" class="w-4 h-4 text-[#CC0000] text-left"></i>
-                        <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-slate-700 border-none ring-0 font-bold">
+                        <select id="cat-filter" onchange="updateFilters('cat', this.value)" class="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer text-slate-700 border-none ring-0">
                             <option value="All">All Categories</option>
                             <option value="Laptop">Laptop</option>
                             <option value="Docking Station">Docking Station</option>
@@ -186,7 +196,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="item-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-[#CC0000]">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
@@ -231,7 +240,6 @@
         </div>
     </div>
 
-    <!-- Bulk Assignment Modal -->
     <div id="bulk-checkout-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
             <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
@@ -262,7 +270,6 @@
         </div>
     </div>
 
-    <!-- Return Process Modal -->
     <div id="return-modal" class="fixed inset-0 modal-backdrop z-[120] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] border-t-black">
             <div class="p-8 border-b border-slate-50 bg-white">
@@ -292,7 +299,6 @@
         </div>
     </div>
 
-    <!-- History Modal -->
     <div id="history-modal" class="fixed inset-0 modal-backdrop z-[100] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[85vh] border-t-[12px] border-t-black">
             <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-white">
@@ -310,7 +316,6 @@
         </div>
     </div>
 
-    <!-- Inventory Audit Modal -->
     <div id="audit-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-amber-500">
             <div class="p-10 border-b border-slate-50 bg-white flex justify-between items-center">
@@ -361,6 +366,26 @@
                 <input type="text" id="emp-dept" placeholder="DEPARTMENT" class="w-full p-6 bg-slate-100 border-none rounded-2xl text-sm font-black outline-none focus:ring-4 focus:ring-black/5" />
             </div>
             <div class="p-10 bg-slate-50 flex gap-6"><button onclick="closeModal('employee-modal')" class="flex-1 py-5 font-black uppercase text-xs tracking-widest text-slate-400">Cancel</button><button onclick="saveEmployee()" class="flex-1 py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest">Update Roster</button></div>
+        </div>
+    </div>
+
+    <div id="receipt-modal" class="fixed inset-0 modal-backdrop z-[150] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] border-t-[12px] border-t-[#3c78e6]">
+            <div class="p-8 border-b border-slate-50 flex justify-between items-center bg-white">
+                <div>
+                    <h3 class="text-2xl font-black italic text-black uppercase tracking-tight">Equipment Receipt</h3>
+                    <p id="receipt-modal-emp" class="text-xs text-[#3c78e6] font-black uppercase tracking-widest mt-1"></p>
+                </div>
+                <button onclick="closeModal('receipt-modal')" class="p-3 bg-slate-50 rounded-full hover:rotate-90 transition-transform"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></button>
+            </div>
+            <div class="p-8 overflow-y-auto flex-1 space-y-6" id="receipt-modal-content">
+            </div>
+            <div class="p-6 bg-slate-50 border-t flex gap-4">
+                <button onclick="closeModal('receipt-modal')" class="flex-1 py-4 font-black uppercase text-xs tracking-widest text-slate-400">Close</button>
+                <button onclick="printReceipt()" class="flex-1 py-4 bg-[#3c78e6] text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl flex items-center justify-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Print Receipt
+                </button>
+            </div>
         </div>
     </div>
 
@@ -418,15 +443,40 @@
 
         window.dismissLoading = () => document.getElementById('loading-overlay')?.classList.add('hidden-overlay');
         
-        window.switchToLocalMode = () => {
+        window.showNotification = (title, message, type = 'success') => {
+            const existing = document.getElementById('custom-notification-modal');
+            if (existing) existing.remove();
+            
+            const modal = document.createElement('div');
+            modal.id = 'custom-notification-modal';
+            modal.className = 'fixed inset-0 modal-backdrop z-[300] flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border-t-[12px] ${type === 'success' ? 'border-t-emerald-500' : 'border-t-red-500'} p-8 text-center">
+                    <div class="w-16 h-16 ${type === 'success' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'} rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+                        <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-triangle'}" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight italic">${title}</h3>
+                    <p class="text-slate-500 text-xs font-bold mb-8 leading-relaxed uppercase tracking-wider">${message}</p>
+                    <button onclick="document.getElementById('custom-notification-modal').remove(); window.render();" class="w-full py-4 ${type === 'success' ? 'bg-black' : 'bg-red-600'} text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Dismiss</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.executeSwitchToLocalMode = () => {
             window.isLocalMode = true;
             const dot = document.getElementById('status-dot');
             if (dot) dot.className = 'w-2 h-2 rounded-full bg-orange-500';
+            const st = document.getElementById('status-text');
+            if (st) st.innerText = "Local Mode (Offline)";
             window.inventory = JSON.parse(localStorage.getItem('et_inventory') || '[]');
             window.employees = JSON.parse(localStorage.getItem('et_employees') || '[]');
             window.checkouts = JSON.parse(localStorage.getItem('et_checkouts') || '[]');
-            window.dismissLoading(); window.render();
+            window.dismissLoading(); 
+            window.render();
         };
+        window.switchToLocalMode = window.executeSwitchToLocalMode;
 
         const init = async () => {
             try {
@@ -460,112 +510,203 @@
 
         window.exportSystemData = () => {
             const wb = XLSX.utils.book_new();
+            
             const inventoryData = window.inventory.map(i => {
                 const activeLoan = window.checkouts.find(c => c.itemId === i.id && c.status === 'active');
-                const borrower = activeLoan ? (window.employees.find(e => e.id === activeLoan.employeeId)?.name || activeLoan.empName || 'Unknown Staff') : 'In Storage';
+                const borrower = activeLoan ? (window.employees.find(e => e.id === activeLoan.employeeId)?.name || activeLoan.empName || 'In Storage') : (i.currentBorrower || 'In Storage');
                 return {
-                    Model: i.name,
-                    Category: i.category,
-                    LaptopID: i.lnNumber || '',
-                    SerialNumber: i.serial || '',
-                    Condition: i.condition || 'Good',
-                    Status: i.status === 'checked-out' ? 'On Loan' : 'Available',
-                    CurrentBorrower: borrower,
-                    SystemID: i.id
+                    "Model": i.name,
+                    "Category": i.category,
+                    "LaptopID": i.lnNumber || 'N/A',
+                    "SerialNumber": i.serial || 'N/A',
+                    "Condition": i.condition || 'Good',
+                    "Status": (i.status === 'checked-out' || borrower !== 'In Storage') ? 'On Loan' : 'Available',
+                    "CurrentBorrower": borrower,
+                    "SystemID": i.id
                 };
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inventoryData), "Inventory");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(window.employees.map(e => ({ID: e.id, Name: e.name, Department: e.department}))), "Employees");
-            
+
+            const employeesData = window.employees.map(e => ({
+                "ID": e.id,
+                "Name": e.name,
+                "Department": e.department || 'General'
+            }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(employeesData), "Employees");
+
             const checkoutsData = window.checkouts.map(c => {
-                const empName = window.employees.find(e => e.id === c.employeeId)?.name || c.empName || 'Former Staff';
                 const item = window.inventory.find(i => i.id === c.itemId);
                 return {
-                    Borrower: empName,
-                    ItemModel: item?.name || 'Deleted Item',
-                    LaptopID: item?.lnNumber || 'N/A',
-                    SerialNumber: item?.serial || 'N/A',
-                    CheckoutDate: c.checkoutDate || '',
-                    Status: c.status || 'active',
-                    ReturnDate: c.returnDate || 'N/A',
-                    ReturnCondition: c.returnCondition || 'N/A',
-                    ReturnNotes: c.returnNotes || 'N/A'
+                    "Borrower": c.empName || (window.employees.find(e => e.id === c.employeeId)?.name || 'Unknown'),
+                    "ItemModel": item ? item.name : 'Unknown Item',
+                    "LaptopID": item ? (item.lnNumber || 'N/A') : 'N/A',
+                    "SerialNumber": item ? (item.serial || 'N/A') : 'N/A',
+                    "CheckoutDate": c.checkoutDate || '',
+                    "Status": c.status || 'active',
+                    "ReturnDate": c.returnDate || 'N/A',
+                    "ReturnCondition": c.returnCondition || 'N/A',
+                    "ReturnNotes": c.returnNotes || 'N/A'
                 };
             });
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checkoutsData), "Checkout_History");
-            XLSX.writeFile(wb, `EquipTrack_Full_Backup.xlsx`);
-        };
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checkoutsData), "Checkout History");
 
-        window.exportEmployeeReceipt = (empId) => {
-            const emp = window.employees.find(e => e.id === empId);
-            const actives = window.checkouts.filter(c => c.status === 'active' && c.employeeId === empId);
-            const data = actives.map(l => {
-                const item = window.inventory.find(i => i.id === l.itemId);
-                return {
-                    "Model": item?.name || "Deleted Item",
-                    "Category": item?.category || "N/A",
-                    "Laptop ID (LN)": item?.lnNumber || "N/A",
-                    "Serial Number (SN)": item?.serial || "N/A",
-                    "Condition": item?.condition || "N/A",
-                    "Checkout Date": l.checkoutDate || ""
-                };
-            });
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Active Assets");
-            XLSX.writeFile(wb, `Asset_Receipt_${emp.name.replace(/\s+/g, '_')}.xlsx`);
+            XLSX.writeFile(wb, `EquipTrack_Full_Backup_${new Date().toISOString().split('T')[0]}.xlsx`);
         };
 
         window.triggerSystemRestore = () => document.getElementById('system-restore-input').click();
-        
+
         window.processSystemRestore = (input) => {
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
-                    const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-                    
-                    const empSheet = workbook.Sheets["Employees"];
-                    const newEmployeesRaw = empSheet ? XLSX.utils.sheet_to_json(empSheet) : [];
-                    
-                    const invSheet = workbook.Sheets["Inventory"];
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetNames = workbook.SheetNames;
+
+                    const getSheet = (preferredNames, keywords) => {
+                        for (const p of preferredNames) {
+                            const exact = sheetNames.find(s => s.trim().toLowerCase() === p.toLowerCase());
+                            if (exact) return workbook.Sheets[exact];
+                        }
+                        let bestSheet = null;
+                        let maxRows = -1;
+                        for (const name of sheetNames) {
+                            const lower = name.toLowerCase();
+                            if (keywords.some(kw => lower.includes(kw)) && !lower.includes('summary') && !lower.includes('overview') && !lower.includes('pivot')) {
+                                const sheet = workbook.Sheets[name];
+                                const rows = XLSX.utils.sheet_to_json(sheet);
+                                if (rows.length > maxRows) {
+                                    maxRows = rows.length;
+                                    bestSheet = sheet;
+                                }
+                            }
+                        }
+                        if (bestSheet) return bestSheet;
+                        for (const name of sheetNames) {
+                            const sheet = workbook.Sheets[name];
+                            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                            if (rows && rows.length > 0) {
+                                const headerRow = (rows[0] || []).map(cell => String(cell).toLowerCase());
+                                const matchCount = keywords.filter(kw => headerRow.some(h => h.includes(kw))).length;
+                                if (matchCount >= 1) {
+                                    const dataRows = XLSX.utils.sheet_to_json(sheet);
+                                    if (dataRows.length > maxRows) {
+                                        maxRows = dataRows.length;
+                                        bestSheet = sheet;
+                                    }
+                                }
+                            }
+                        }
+                        return bestSheet;
+                    };
+
+                    const invSheet = getSheet(['Inventory', 'Assets', 'Equipment', 'Items', 'Hardware'], ['inventory', 'model', 'asset', 'equipment', 'laptop']) || workbook.Sheets[sheetNames[0]];
+                    const empSheet = getSheet(['Employees', 'Staff', 'Roster', 'Users', 'Members'], ['employee', 'staff', 'department', 'roster']);
+                    const chkSheet = getSheet(['Checkout History', 'Checkouts', 'Loans', 'History', 'Log'], ['checkout', 'loan', 'history', 'borrower']);
+
                     const newInventoryRows = invSheet ? XLSX.utils.sheet_to_json(invSheet) : [];
-                    
-                    const chkSheet = workbook.Sheets["Checkout_History"] || workbook.Sheets["Checkout History"];
+                    const newEmployeesRaw = empSheet ? XLSX.utils.sheet_to_json(empSheet) : [];
                     const newCheckoutsRaw = chkSheet ? XLSX.utils.sheet_to_json(chkSheet) : [];
 
-                    const parsedEmployees = newEmployeesRaw.map((r, idx) => ({
-                        id: (r.ID || 'e' + Date.now() + idx).toString().trim(),
-                        name: (r.Name || '').toString().trim(),
-                        department: (r.Department || 'General').toString().trim()
-                    })).filter(e => e.name);
+                    const getVal = (row, candidates) => {
+                        const rowKeys = Object.keys(row);
+                        for (const cand of candidates) {
+                            const cleanCand = cand.toLowerCase().replace(/[^a-z0-9]/g, '');
+                            for (const key of rowKeys) {
+                                const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                if (cleanKey === cleanCand) {
+                                    const val = row[key];
+                                    if (val !== undefined && val !== null && String(val).trim() !== '') return String(val).trim();
+                                }
+                            }
+                        }
+                        for (const cand of candidates) {
+                            const cleanCand = cand.toLowerCase().replace(/[^a-z0-9]/g, '');
+                            if (cleanCand.length < 3) continue;
+                            for (const key of rowKeys) {
+                                const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                if (cleanKey.includes(cleanCand)) {
+                                    const val = row[key];
+                                    if (val !== undefined && val !== null && String(val).trim() !== '') return String(val).trim();
+                                }
+                            }
+                        }
+                        return null;
+                    };
+
+                    const parsedEmployees = newEmployeesRaw.map((r, idx) => {
+                        const id = (getVal(r, ["systemid", "databaseid", "employeeid", "staffid", "id"]) || ('e_' + Date.now() + '_' + idx)).toString().trim();
+                        const name = (getVal(r, ["name", "employeename", "fullname", "staff", "person"]) || '').toString().trim();
+                        const department = (getVal(r, ["department", "dept", "division"]) || 'General').toString().trim();
+                        return { id, name, department };
+                    }).filter(e => e.name);
 
                     const empNameMap = new Map(parsedEmployees.map(e => [e.name.toLowerCase(), e.id]));
 
                     const getOrCreateEmpId = (bName) => {
                         const cleanName = (bName || '').toString().trim();
-                        if (!cleanName || cleanName.toLowerCase() === 'in storage' || cleanName.toLowerCase() === 'null' || cleanName.toLowerCase() === 'nan' || cleanName.toLowerCase() === 'ffg madison - cube') return null;
+                        if (!cleanName || ['in storage', 'instorage', 'available', 'in stock', 'null', 'nan', 'former staff', 'n/a', 'unassigned'].includes(cleanName.toLowerCase())) return null;
                         let empId = empNameMap.get(cleanName.toLowerCase());
                         if (!empId) {
-                            empId = 'e' + Date.now() + Math.random().toString(36).substr(2, 5);
+                            empId = 'e_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
                             empNameMap.set(cleanName.toLowerCase(), empId);
                             parsedEmployees.push({ id: empId, name: cleanName, department: 'General' });
                         }
                         return empId;
                     };
 
+                    const inStorageKeywords = ['in storage', 'instorage', 'available', 'in stock', 'instock', 'none', 'n/a', 'nan', 'null', 'store', 'storage', 'unassigned', 'free'];
+
+                    const usedInvIds = new Set();
                     const parsedInventory = newInventoryRows.map((r, idx) => {
-                        const id = (r.SystemID || ('inv_' + idx + '_' + Date.now())).toString().trim();
-                        const name = (r.Model || r.ItemModel || 'Unknown Model').toString().trim();
-                        const category = (r.Category || 'Other').toString().trim();
-                        const lnNumber = (r.LaptopID && r.LaptopID !== 'N/A' && r.LaptopID !== 'nan') ? r.LaptopID.toString().trim() : '';
-                        const serial = (r.SerialNumber && r.SerialNumber !== 'N/A' && r.SerialNumber !== 'nan') ? r.SerialNumber.toString().trim() : '';
-                        const condition = (r.Condition || 'Good').toString().trim();
-                        const borrower = (r.CurrentBorrower || '').toString().trim();
-                        const statusRaw = (r.Status || '').toString().toLowerCase();
+                        let name = getVal(r, ["model", "model name", "item model", "equipment name", "hardware model", "device name", "item name", "equipment", "hardware", "device", "description", "product", "model #", "model no", "item"]);
                         
-                        const isOnLoan = statusRaw.includes('loan') || (borrower && borrower.toLowerCase() !== 'in storage' && borrower.toLowerCase() !== 'null' && borrower.toLowerCase() !== 'nan');
+                        const rawLn = getVal(r, ["laptop id", "laptopid", "laptop number", "laptop #", "laptop no", "ln number", "ln #", "ln no", "ln", "asset tag", "asset id", "asset #", "tag"]);
+                        const lnNumber = (rawLn && !['n/a', 'nan', 'no ln', '-', 'none', 'null', 'undefined'].includes(rawLn.toLowerCase())) ? rawLn : '';
                         
+                        const rawSn = getVal(r, ["serial number", "serialnumber", "serial #", "serial no", "serial", "sn number", "sn #", "sn no", "sn", "s/n"]);
+                        const serial = (rawSn && !['n/a', 'nan', 'no sn', '-', 'none', 'null', 'undefined'].includes(rawSn.toLowerCase())) ? rawSn : '';
+
+                        if (!name) {
+                            if (lnNumber) name = "Item " + lnNumber;
+                            else if (serial) name = "Item " + serial;
+                            else {
+                                const nonBlankVal = Object.values(r).find(v => v !== undefined && v !== null && String(v).trim() !== '');
+                                if (!nonBlankVal) return null;
+                                name = String(nonBlankVal).trim();
+                            }
+                        }
+
+                        const category = getVal(r, ["category", "item category", "asset category", "cat", "type", "group"]) || 'Other';
+                        const condition = getVal(r, ["condition", "state", "status/condition", "item condition"]) || 'Good';
+                        const borrower = getVal(r, ["current borrower", "currentborrower", "borrower", "assigned to", "assignedto", "user", "holder", "checked out to", "employee", "person"]) || '';
+                        const statusRaw = (getVal(r, ["status", "availability", "current status", "state"]) || '').toLowerCase().trim();
+                        const cleanBorrower = borrower.toLowerCase().trim();
+
+                        const isExplicitlyInStorage = inStorageKeywords.some(kw => 
+                            (statusRaw && statusRaw.includes(kw)) || 
+                            (cleanBorrower && (cleanBorrower === kw || cleanBorrower.includes(kw)))
+                        );
+                        
+                        const isOnLoan = !isExplicitlyInStorage && (
+                            statusRaw.includes('loan') || 
+                            statusRaw.includes('checked') || 
+                            (cleanBorrower && !inStorageKeywords.some(kw => cleanBorrower.includes(kw)))
+                        );
+                        
+                        let rawId = getVal(r, ["system id", "systemid", "database id", "db id", "id"]);
+                        let id = null;
+                        if (rawId && !['n/a', 'nan', 'null', 'undefined', 'none', '-'].includes(rawId.toLowerCase())) {
+                            id = rawId;
+                        }
+                        
+                        if (!id || usedInvIds.has(id)) {
+                            id = 'inv_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 4);
+                        }
+                        usedInvIds.add(id);
+
                         return {
                             id,
                             name,
@@ -576,52 +717,93 @@
                             status: isOnLoan ? 'checked-out' : 'available',
                             currentBorrower: isOnLoan ? borrower : null
                         };
-                    });
+                    }).filter(Boolean);
 
                     const parsedCheckouts = [];
+                    const unitActiveCheckoutMap = new Set();
 
-                    // 1. Process past returned history from Checkout_History
                     newCheckoutsRaw.forEach((r, idx) => {
-                        const isAct = (r.Status || '').toString().toLowerCase() === 'active';
-                        if (isAct) return; // Active checkouts are driven directly by Inventory's CurrentBorrower for 100% assignment precision
-
-                        const bName = (r.Borrower || '').toString().trim();
+                        const bName = (getVal(r, ["borrower", "employee", "staff", "name", "holder", "user"]) || '').toString().trim();
                         const empId = getOrCreateEmpId(bName);
                         if (!empId) return;
 
-                        const modelName = (r.ItemModel || r.Model || '').toString().trim();
-                        const ln = (r.LaptopID && r.LaptopID !== 'N/A' && r.LaptopID !== 'nan') ? r.LaptopID.toString().trim() : '';
-                        const sn = (r.SerialNumber && r.SerialNumber !== 'N/A' && r.SerialNumber !== 'nan') ? r.SerialNumber.toString().trim() : '';
+                        const modelName = (getVal(r, ["item model", "model", "item", "model name", "equipment"]) || '').toString().trim();
+                        const rawLn = getVal(r, ["laptop id", "laptopid", "laptop number", "asset tag", "ln"]);
+                        const ln = (rawLn && !['n/a', 'nan', 'no ln', '-'].includes(rawLn.toLowerCase())) ? rawLn : '';
+                        
+                        const rawSn = getVal(r, ["serial number", "serialnumber", "serial", "sn"]);
+                        const sn = (rawSn && !['n/a', 'nan', 'no sn', '-'].includes(rawSn.toLowerCase())) ? rawSn : '';
+                        
+                        const statusStr = (getVal(r, ["status"]) || '').toString().toLowerCase();
+                        const isAct = statusStr.includes('active') || statusStr.includes('on loan') || statusStr.includes('checked');
 
                         let matchedUnit = parsedInventory.find(i => {
                             if (sn && i.serial && i.serial.toLowerCase() === sn.toLowerCase()) return true;
                             if (ln && i.lnNumber && i.lnNumber.toLowerCase() === ln.toLowerCase()) return true;
-                            if (modelName && i.name.toLowerCase() === modelName.toLowerCase()) return true;
                             return false;
                         });
 
+                        if (!matchedUnit && modelName) {
+                            matchedUnit = parsedInventory.find(i => i.name.toLowerCase() === modelName.toLowerCase() && i.status === 'checked-out' && !unitActiveCheckoutMap.has(i.id));
+                        }
+
                         if (matchedUnit) {
+                            const rawDate = getVal(r, ["checkout date", "checkoutdate", "date", "borrowed date"]);
+                            let formattedDate = new Date().toISOString().split('T')[0];
+                            if (rawDate) {
+                                if (typeof rawDate === 'number') {
+                                    const d = XLSX.SSF.parse_date_code(rawDate);
+                                    if (d) formattedDate = `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+                                } else {
+                                    const parsed = new Date(rawDate);
+                                    if (!isNaN(parsed.getTime())) formattedDate = parsed.toISOString().split('T')[0];
+                                    else formattedDate = rawDate.toString().split('T')[0];
+                                }
+                            }
+
+                            const rawRetDate = getVal(r, ["return date", "returndate", "returned date"]);
+                            let formattedRetDate = null;
+                            if (rawRetDate && !['n/a', 'nan', 'no date', '-'].includes(rawRetDate.toLowerCase())) {
+                                if (typeof rawRetDate === 'number') {
+                                    const d = XLSX.SSF.parse_date_code(rawRetDate);
+                                    if (d) formattedRetDate = `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+                                } else {
+                                    const parsedRet = new Date(rawRetDate);
+                                    if (!isNaN(parsedRet.getTime())) formattedRetDate = parsedRet.toISOString().split('T')[0];
+                                    else formattedRetDate = rawRetDate.toString().split('T')[0];
+                                }
+                            }
+
+                            const isReallyActive = isAct && !formattedRetDate;
+
+                            if (isReallyActive) {
+                                if (unitActiveCheckoutMap.has(matchedUnit.id)) return;
+                                unitActiveCheckoutMap.add(matchedUnit.id);
+                                matchedUnit.status = 'checked-out';
+                                matchedUnit.currentBorrower = bName;
+                            }
+
                             parsedCheckouts.push({
-                                id: 'chk_hist_' + Date.now() + '_' + idx,
+                                id: 'chk_' + Date.now() + '_' + idx,
                                 itemId: matchedUnit.id,
                                 employeeId: empId,
                                 empName: bName,
-                                checkoutDate: r.CheckoutDate ? r.CheckoutDate.toString().split('T')[0] : new Date().toISOString().split('T')[0],
-                                status: 'returned',
-                                returnDate: (r.ReturnDate && r.ReturnDate !== 'N/A' && r.ReturnDate !== 'nan') ? r.ReturnDate.toString().split('T')[0] : null,
-                                returnCondition: (r.ReturnCondition && r.ReturnCondition !== 'N/A' && r.ReturnCondition !== 'nan') ? r.ReturnCondition.toString() : null,
-                                returnNotes: (r.ReturnNotes && r.ReturnNotes !== 'N/A' && r.ReturnNotes !== 'nan') ? r.ReturnNotes.toString() : null
+                                checkoutDate: formattedDate,
+                                status: isReallyActive ? 'active' : 'returned',
+                                returnDate: formattedRetDate,
+                                returnCondition: getVal(r, ["return condition", "returncondition", "condition"]) || null,
+                                returnNotes: getVal(r, ["return notes", "returnnotes", "notes"]) || null
                             });
                         }
                     });
 
-                    // 2. Generate definitive active loans directly from Inventory's CurrentBorrower assignments
                     parsedInventory.forEach((invUnit, idx) => {
-                        if (invUnit.status === 'checked-out' && invUnit.currentBorrower) {
+                        if (invUnit.status === 'checked-out' && invUnit.currentBorrower && !unitActiveCheckoutMap.has(invUnit.id)) {
                             const empId = getOrCreateEmpId(invUnit.currentBorrower);
                             if (empId) {
+                                unitActiveCheckoutMap.add(invUnit.id);
                                 parsedCheckouts.push({
-                                    id: 'chk_active_' + Date.now() + '_' + idx,
+                                    id: 'chk_gen_' + Date.now() + '_' + idx,
                                     itemId: invUnit.id,
                                     employeeId: empId,
                                     empName: invUnit.currentBorrower,
@@ -631,17 +813,20 @@
                                     returnCondition: null,
                                     returnNotes: null
                                 });
+                            } else {
+                                invUnit.status = 'available';
+                                invUnit.currentBorrower = null;
                             }
                         }
                     });
 
                     if (window.isLocalMode) {
                         window.employees = parsedEmployees;
-                        window.inventory = parsedInventory.map(i => ({ id: i.id, name: i.name, category: i.category, lnNumber: i.lnNumber, serial: i.serial, condition: i.condition, status: i.status }));
+                        window.inventory = parsedInventory;
                         window.checkouts = parsedCheckouts;
                         persistLocal();
                     } else {
-                        const batch = writeBatch(db);
+                        const ops = [];
 
                         const [invSnap, empSnap, chkSnap] = await Promise.all([
                             getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'inventory')),
@@ -649,27 +834,28 @@
                             getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'checkouts'))
                         ]);
 
-                        invSnap.docs.forEach(d => batch.delete(d.ref));
-                        empSnap.docs.forEach(d => batch.delete(d.ref));
-                        chkSnap.docs.forEach(d => batch.delete(d.ref));
+                        invSnap.docs.forEach(d => ops.push(b => b.delete(d.ref)));
+                        empSnap.docs.forEach(d => ops.push(b => b.delete(d.ref)));
+                        chkSnap.docs.forEach(d => ops.push(b => b.delete(d.ref)));
 
                         parsedEmployees.forEach(emp => {
-                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', emp.id), { name: emp.name, department: emp.department });
+                            ops.push(b => b.set(doc(db, 'artifacts', appId, 'public', 'data', 'employees', emp.id), { name: emp.name, department: emp.department }));
                         });
 
                         parsedInventory.forEach(inv => {
-                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', inv.id), {
+                            ops.push(b => b.set(doc(db, 'artifacts', appId, 'public', 'data', 'inventory', inv.id), {
                                 name: inv.name,
                                 category: inv.category,
                                 lnNumber: inv.lnNumber,
                                 serial: inv.serial,
                                 condition: inv.condition,
-                                status: inv.status
-                            });
+                                status: inv.status,
+                                currentBorrower: inv.currentBorrower
+                            }));
                         });
 
                         parsedCheckouts.forEach(chk => {
-                            batch.set(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', chk.id), {
+                            ops.push(b => b.set(doc(db, 'artifacts', appId, 'public', 'data', 'checkouts', chk.id), {
                                 itemId: chk.itemId,
                                 employeeId: chk.employeeId,
                                 empName: chk.empName,
@@ -678,20 +864,32 @@
                                 returnDate: chk.returnDate || null,
                                 returnCondition: chk.returnCondition || null,
                                 returnNotes: chk.returnNotes || null
-                            });
+                            }));
                         });
 
-                        await batch.commit();
-                        window.inventory = parsedInventory.map(i => ({ id: i.id, name: i.name, category: i.category, lnNumber: i.lnNumber, serial: i.serial, condition: i.condition, status: i.status }));
+                        const CHUNK_SIZE = 400;
+                        for (let i = 0; i < ops.length; i += CHUNK_SIZE) {
+                            const batch = writeBatch(db);
+                            const chunk = ops.slice(i, i + CHUNK_SIZE);
+                            chunk.forEach(op => op(batch));
+                            await batch.commit();
+                        }
+
+                        window.inventory = parsedInventory;
                         window.employees = parsedEmployees;
                         window.checkouts = parsedCheckouts;
                     }
 
-                    alert("System Restored Successfully! All unit assignments, serial numbers, and staff links have been precisely synchronized from the spreadsheet.");
+                    const inStorageCount = parsedInventory.filter(i => i.status === 'available').length;
+                    window.showNotification(
+                        "System Restored Successfully", 
+                        `Restored ${parsedInventory.length} total units (${inStorageCount} in storage), ${parsedEmployees.length} staff records, and ${parsedCheckouts.length} checkout logs from spreadsheet.`, 
+                        "success"
+                    );
                     window.render();
                 } catch (err) {
                     console.error("Restore failed:", err);
-                    alert("Restore failed. Please verify that you uploaded a valid EquipTrack Excel backup file.");
+                    window.showNotification("Restore Failed", "Please verify that you uploaded a valid EquipTrack backup spreadsheet.", "error");
                 }
                 input.value = '';
             };
@@ -895,7 +1093,7 @@
 
         window.openInventoryAuditModal = () => {
             const totalUnits = window.inventory.length;
-            const activeLoans = window.checkouts.filter(c => c.status === 'active');
+            const activeLoans = window.checkouts.filter(c => c.status === 'active' && window.inventory.some(i => i.id === c.itemId && i.status === 'checked-out'));
             const checkedOutUnits = window.inventory.filter(i => i.status === 'checked-out').length;
             
             const msgEl = document.getElementById('audit-status-message');
@@ -973,7 +1171,7 @@
                 }
             }
 
-            alert(`Audit Complete: Resolved ${fixedCount} discrepancy issues.`);
+            window.showNotification("Audit Complete", `Resolved ${fixedCount} discrepancy issues.`, "success");
             window.closeModal('audit-modal');
             window.render();
         };
@@ -1082,6 +1280,115 @@
             document.getElementById('history-modal').classList.remove('hidden'); if(window.lucide) lucide.createIcons();
         };
 
+        window.openEmployeeReceipt = (id) => {
+            const emp = window.employees.find(e => e.id === id);
+            if (!emp) return;
+            
+            const empLoans = window.checkouts.filter(c => c.employeeId === id && c.status === 'active' && window.inventory.some(i => i.id === c.itemId && i.status === 'checked-out'));
+            const sub = document.getElementById('receipt-modal-emp');
+            if (sub) sub.innerText = `${emp.name.toUpperCase()} • ${emp.department || 'GENERAL STAFF'}`;
+
+            const content = document.getElementById('receipt-modal-content');
+            const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+            if (content) {
+                content.innerHTML = `
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-2">
+                        <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                            <span>Issued Date</span>
+                            <span class="text-black">${today}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                            <span>Total Assigned Assets</span>
+                            <span class="text-[#3c78e6] font-extrabold">${empLoans.length} Units</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1 italic">Active Equipment List</h4>
+                        ${empLoans.length ? `
+                            <div class="space-y-3">
+                                ${empLoans.map(l => {
+                                    const item = window.inventory.find(i => i.id === l.itemId);
+                                    return `
+                                        <div class="bg-white border border-slate-200 p-4 rounded-2xl flex justify-between items-center shadow-sm">
+                                            <div>
+                                                <div class="font-black text-black text-sm uppercase italic tracking-tight">${item?.name || 'Unknown Asset'}</div>
+                                                <div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">ID: ${item?.lnNumber || 'N/A'} • SN: ${item?.serial || 'N/A'}</div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="px-3 py-1 bg-blue-50 text-[#3c78e6] rounded-xl text-[9px] font-black uppercase tracking-widest">${l.checkoutDate || 'Active'}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : `<div class="p-8 bg-slate-50 rounded-2xl text-center text-slate-400 font-black text-[10px] uppercase tracking-widest italic">No active assets currently assigned to this employee.</div>`}
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 space-y-6">
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed italic">By signing below, the employee acknowledges receipt of the above hardware in good physical condition and agrees to adhere to company equipment policies.</p>
+                        <div class="pt-8 border-b border-dashed border-slate-300 flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest pb-1">
+                            <span>Employee Signature</span>
+                            <span>Date</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('receipt-modal').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.printReceipt = () => {
+            const content = document.getElementById('receipt-modal-content').innerHTML;
+            const empName = document.getElementById('receipt-modal-emp').innerText;
+            const printWindow = window.open('', '_blank');
+            if (!printWindow) return;
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Equipment Receipt - ${empName}</title>
+                        <style>
+                            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #000; }
+                            h1 { font-size: 22px; font-weight: 900; margin-bottom: 4px; text-transform: uppercase; font-style: italic; }
+                            h2 { font-size: 13px; font-weight: 800; color: #3c78e6; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+                            .bg-slate-50 { background: #f8fafc; }
+                            .p-6 { padding: 20px; }
+                            .p-4 { padding: 14px; }
+                            .rounded-2xl { border-radius: 16px; }
+                            .border { border: 1px solid #e2e8f0; }
+                            .space-y-3 > * + * { margin-top: 10px; }
+                            .space-y-6 > * + * { margin-top: 20px; }
+                            .flex { display: flex; }
+                            .justify-between { justify-content: space-between; }
+                            .items-center { align-items: center; }
+                            .font-black { font-weight: 900; }
+                            .uppercase { text-transform: uppercase; }
+                            .text-sm { font-size: 13px; }
+                            .text-xs { font-size: 11px; }
+                            .text-\\[10px\\] { font-size: 10px; }
+                            .text-\\[9px\\] { font-size: 9px; }
+                            .text-slate-400 { color: #64748b; }
+                            .pt-8 { padding-top: 32px; }
+                            .border-b { border-bottom: 1px solid #94a3b8; }
+                            .border-dashed { border-style: dashed; }
+                            .pt-6 { padding-top: 24px; }
+                            .border-t { border-top: 1px solid #e2e8f0; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>EQUIPTRACK • EQUIPMENT RECEIPT</h1>
+                        <h2>${empName}</h2>
+                        ${content}
+                        <script>window.onload = function() { window.print(); window.close(); }<\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        };
+
         window.toggleEmployeeGroup = (id) => { if (window.expandedEmployees.has(id)) window.expandedEmployees.delete(id); else window.expandedEmployees.add(id); window.render(); };
         window.toggleInventoryModel = (name) => { if (window.expandedInventoryModels.has(name)) window.expandedInventoryModels.delete(name); else window.expandedInventoryModels.add(name); window.render(); };
 
@@ -1101,7 +1408,7 @@
                 area.innerHTML = `
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
                         ${renderStatCard('Total Units', window.inventory.length, 'box', 'bg-slate-100', 'text-black')}
-                        ${renderStatCard('Out Now', actives.length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
+                        ${renderStatCard('Out Now', window.inventory.filter(i=>i.status==='checked-out').length, 'arrow-up-right', 'bg-red-50', 'text-[#CC0000]')}
                         ${renderStatCard('In Storage', window.inventory.filter(i=>i.status==='available').length, 'check-circle', 'bg-emerald-50', 'text-emerald-600')}
                         ${renderStatCard('Employees', window.employees.length, 'users', 'bg-blue-50', 'text-[#3c78e6]')}
                     </div>
@@ -1113,11 +1420,11 @@
                                 const dispBorrower = l.empName || window.employees.find(e=>e.id===l.employeeId)?.name || 'Former Staff';
                                 return `<div class="py-3.5 text-sm flex justify-between items-center group">
                                     <div>
-                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors">${i?.name}</div>
+                                        <div class="font-black text-black uppercase tracking-tight group-hover:text-[#CC0000] transition-colors">${i?.name || 'Item'}</div>
                                         <div class="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5">${i?.lnNumber || 'No ID'} • ${i?.serial || 'No SN'}</div>
                                     </div>
                                     <span class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-4 py-2 rounded-full">${dispBorrower}</span>
-                                </div>`
+                                </div>`;
                             }).join('') || '<div class="p-10 text-center text-slate-300 font-black text-[10px] tracking-widest uppercase">No active records found.</div>'}
                         </div>
                     </div>`;
@@ -1162,36 +1469,8 @@
                 area.innerHTML = `<div class="bg-white rounded-3xl border shadow-sm overflow-hidden text-left"><table class="w-full text-left"><thead class="bg-slate-100 text-[10px] uppercase font-black text-slate-400 border-b"><tr><th class="w-12"></th><th class="px-6 py-4 tracking-widest uppercase">Borrower Name</th><th class="px-6 py-4 text-right pr-6 tracking-widest uppercase">Items Assigned</th></tr></thead><tbody class="divide-y divide-slate-50">${Object.keys(grouped).map(id => `<tr onclick="toggleEmployeeGroup('${id}')" class="cursor-pointer hover:bg-slate-50"><td class="text-center"><i data-lucide="${window.expandedEmployees.has(id)?'chevron-down':'chevron-right'}" class="w-5 h-5 ml-4 text-slate-200"></i></td><td class="px-6 py-4 font-black text-black text-sm uppercase italic tracking-tighter">${grouped[id].eName || 'User'}</td><td class="px-6 py-4 text-right font-black text-[#CC0000] text-sm italic pr-6">${grouped[id].loans.length} Units</td></tr>${window.expandedEmployees.has(id)?grouped[id].loans.map(l => `<tr class="bg-slate-50/40"><td></td><td class="px-6 py-3.5 border-l-[8px] border-black"><div class="text-xs font-black text-slate-700 uppercase tracking-widest">${l.iName}</div><div class="text-[9px] text-slate-300 font-black uppercase mt-0.5 tracking-[0.15em]">ID: ${l.iLn || 'N/A'} • SN: ${l.iSn || 'N/A'}</div></td><td class="px-6 py-3.5 text-right pr-6"><button onclick="handleReturn('${l.id}')" class="text-white font-black text-[8px] uppercase tracking-widest bg-black px-5 py-2 rounded-full shadow-lg">RETURN</button></td></tr>`).join(''):''}`).join('') || '<tr><td colspan="3" class="p-10 text-center text-slate-300 font-black text-[10px] uppercase tracking-widest italic">No active loan records.</td></tr>'}</tbody></table></div>`;
             } else if (window.currentView === 'employees') {
                 const emps = window.employees.filter(e => e.name.toLowerCase().includes(window.searchQuery) || e.department?.toLowerCase().includes(window.searchQuery)).sort((a,b)=>a.name.localeCompare(b.name));
-                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5"></i> Log</button> <button onclick="exportEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#2a5bbd] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl" title="Download Asset Receipt"><i data-lucide="download" class="w-3.5 h-3.5"></i> Receipt</button> </div> </div>`}).join('')}`;
+                area.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${emps.map(e => {const heldCount = actives.filter(c => c.employeeId === e.id).length; return `<div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4 relative group"><div class="absolute top-4 right-4 flex gap-2"><button onclick="openEmployeeModal('${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-black transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button><button onclick="initiateDelete('employee', '${e.id}')" class="p-2 bg-slate-50 rounded-lg text-slate-300 hover:text-[#CC0000] transition-colors shadow-sm"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div><div><div class="w-12 h-12 bg-slate-100 text-black rounded-2xl flex items-center justify-center font-black text-xl mb-3 shadow-inner italic">${e.name[0]}</div><div class="font-black text-lg text-black leading-tight uppercase tracking-tighter italic">${e.name}</div><div class="text-[10px] text-slate-300 uppercase font-black tracking-[0.1em] mt-1">${e.department || 'General Staff'}</div><div class="text-[9px] font-black text-white mt-4 bg-[#CC0000] inline-block px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-red-500/10">${heldCount} Assets Held</div></div> <div class="flex gap-2"> <button onclick="openEmployeeHistory('${e.id}')" class="flex-1 py-3 bg-black border-none rounded-2xl text-[9px] font-black text-white hover:bg-[#CC0000] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="history" class="w-3.5 h-3.5"></i> Log</button> <button onclick="openEmployeeReceipt('${e.id}')" class="flex-1 py-3 bg-[#3c78e6] border-none rounded-2xl text-[9px] font-black text-white hover:bg-blue-700 uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-xl"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Receipt</button> </div> </div>`;}).join('')}`;
             }
-            if (window.lucide) lucide.createIcons();
-        };
-
-        window.renderUnitSublist = (modelName, subSearch) => {
-            const safeId = modelName.replace(/[^a-zA-Z0-9]/g, '_');
-            const container = document.getElementById(`sublist-${safeId}`);
-            if (!container) return;
-            const units = window.inventory.filter(i => i.name === modelName);
-            const currentActives = window.checkouts.filter(c => c.status === 'active' && window.inventory.some(i => i.id === c.itemId && i.status === 'checked-out'));
-            const filtered = units.filter(u => {
-                const detailMatch = !subSearch || (u.lnNumber && u.lnNumber.toLowerCase().includes(subSearch.toLowerCase())) || (u.serial && u.serial.toLowerCase().includes(subSearch.toLowerCase()));
-                const loan = currentActives.find(c => c.itemId === u.id);
-                const borrowerName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || "").toLowerCase() : "";
-                const borrowerMatch = !subSearch || borrowerName.includes(subSearch.toLowerCase());
-                return detailMatch || borrowerMatch;
-            });
-
-            container.innerHTML = filtered.map(u => {
-                const loan = currentActives.find(c => c.itemId === u.id);
-                const bName = loan ? (loan.empName || window.employees.find(e => e.id === loan.employeeId)?.name || 'User') : null;
-                const condBadge = u.condition ? `<span class="px-2 py-0.5 rounded text-[9px] font-black bg-slate-100 text-slate-600 uppercase tracking-widest ml-2">${u.condition}</span>` : '';
-                return `<tr class="border-b last:border-0 border-slate-50"><td class="px-6 py-3.5"><div class="text-sm font-black text-slate-800 uppercase tracking-tight">${u.lnNumber || 'NO ID'}${condBadge}</div><div class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">SN: ${u.serial || 'N/A'}</div></td><td class="px-6 py-3.5"><span class="text-[9px] font-black tracking-[0.15em] ${u.status==='available'?'text-emerald-500':'text-[#CC0000]'} uppercase italic">${u.status==='available'?'IN STORAGE':`WITH ${bName}`}</span></td><td class="px-6 py-3.5 text-right pr-6 flex justify-end gap-3">
-                    <button onclick="openUnitHistory('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors" title="Logs"><i data-lucide="history" class="w-3.5 h-3.5"></i></button>
-                    <button onclick="openItemModal('${u.id}')" class="p-1.5 text-slate-200 hover:text-black transition-colors" title="Edit"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
-                    <button onclick="initiateDelete('item', '${u.id}')" class="p-1.5 text-slate-200 hover:text-[#CC0000] transition-colors" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                    ${u.status==='available'?`<button onclick="openCheckoutModal('${u.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Assign</button>`:`<button onclick="handleReturn('${loan?.id}')" class="ml-3 text-white font-black text-[8px] uppercase tracking-widest bg-[#3c78e6] px-4 py-2 rounded-xl shadow-lg">Return</button>`}
-                </td></tr>`;
-            }).join('') || '<tr><td colspan="3" class="p-6 text-center italic text-slate-300 font-black text-[9px] uppercase">No matching units.</td></tr>';
             if (window.lucide) lucide.createIcons();
         };
 
